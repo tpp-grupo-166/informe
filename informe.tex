@@ -28,7 +28,7 @@
 \normalsize
 
 % ====== DATOS DEL TRABAJO ======
-\newcommand{\tituloTrabajo}{Título del Trabajo Final}
+\newcommand{\tituloTrabajo}{Data Analytics para la estimación de la presión de yacimientos de petróleo}
 
 % ====== ENCABEZADO Y PIE DE PÁGINA ======
 \pagestyle{fancy}
@@ -120,7 +120,13 @@ cuenta con mi aval para su presentación y defensa.
 \section*{Resumen}
 \addcontentsline{toc}{section}{Resumen}
 
-Texto del resumen en español.
+La estimación precisa de la presión en yacimientos de petróleo es un factor crítico para la gestión eficiente de la producción de hidrocarburos. Los métodos tradicionales, basados en la física de reservorios, presentan limitaciones frente al creciente volumen y complejidad de los datos disponibles. En este contexto, surge la necesidad de explorar nuevas herramientas que permitan realizar predicciones rápidas, robustas y escalables.
+
+Este proyecto propone el desarrollo de un sistema basado en técnicas de \textit{Data Analytics} y \textit{Machine Learning}, orientado a la estimación de la presión de yacimientos. La solución integra un módulo de predicción que consume y procesa datos físicos del reservorio, entrenando modelos de regresión y aprendizaje profundo, junto con una interfaz web que facilita su uso por parte de ingenieros sin formación específica en ciencia de datos.
+
+La metodología incluye el preprocesamiento y limpieza de datos, el diseño de \textit{features}, la comparación de distintos algoritmos (como Random Forest, XGBoost, LSTM y PINNs) y la validación mediante métricas estándar de regresión, pruebas cruzadas y contrastes con metodologías convencionales (PTA, EBM). Asimismo, el proyecto sigue un enfoque ágil, con entregables iterativos y validación continua para garantizar la utilidad y confiabilidad del sistema.
+
+El impacto esperado de esta propuesta radica en la optimización de la producción, la reducción de riesgos operativos y ambientales, y la provisión de una herramienta transparente y escalable que contribuya a la toma de decisiones en la industria energética.
 
 % ============================================================
 % 4. PALABRAS CLAVE
@@ -128,7 +134,7 @@ Texto del resumen en español.
 \section*{Palabras clave}
 \addcontentsline{toc}{section}{Palabras clave}
 
-Palabra1, Palabra2, Palabra3, Palabra4.
+Yacimiento de petróleo, machine learning, estimación de presión, física de reservorio, recuperación secundaria.
 
 % ============================================================
 % 5. ABSTRACT
@@ -137,7 +143,13 @@ Palabra1, Palabra2, Palabra3, Palabra4.
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 
-Abstract text in English.
+Accurate estimation of reservoir pressure is a key factor in the efficient management of hydrocarbon production. Traditional methods, based on reservoir physics, present limitations when dealing with the increasing volume and complexity of modern data. In this context, new approaches are required to provide fast, robust, and scalable predictions.
+
+This project proposes the development of a system based on \textit{Data Analytics} and \textit{Machine Learning} techniques for reservoir pressure estimation. The solution integrates a prediction module that processes reservoir data and trains regression and deep learning models, along with a web interface designed for engineers without data science expertise.
+
+The methodology includes data preprocessing and cleaning, feature engineering, evaluation of various algorithms (such as Random Forest, XGBoost, LSTM, and PINNs), and validation through standard regression metrics, cross-validation, and comparisons with conventional methods (PTA, EBM). The project follows an agile approach with iterative deliverables and continuous validation to ensure the system's utility and reliability.
+
+The expected impact lies in production optimization, reduction of operational and environmental risks, and the delivery of a transparent and scalable tool that supports decision-making in the energy industry.
 
 % ============================================================
 % 6. KEYWORDS
@@ -145,7 +157,7 @@ Abstract text in English.
 \section*{Keywords}
 \addcontentsline{toc}{section}{Keywords}
 
-Keyword1, Keyword2, Keyword3, Keyword4.
+Oil reservoir, machine learning, pressure estimation, reservoir physics, secondary recovery.
 
 % ============================================================
 % 7. AGRADECIMIENTOS (OPCIONAL)
@@ -166,49 +178,116 @@ Texto de agradecimientos (sección opcional).
 % ============================================================
 \section*{Introducción}
 
-Texto de la introducción.
+La extracción de petróleo es un proceso que se lleva a cabo en formaciones subterráneas conocidas como yacimientos, donde el hidrocarburo, junto con otras sustancias como gas y agua, se encuentra almacenado en rocas porosas bajo condiciones de presión natural.
+
+La gestión eficaz y la explotación económica de dichos yacimientos dependen fundamentalmente de una comprensión precisa de sus propiedades y comportamientos. Entre todos los parámetros que gobiernan la producción de hidrocarburos, la \textbf{presión} de yacimiento se erige como la variable más crítica.
+
+Durante la fase inicial de la producción (recuperación primaria), la presión del reservorio es la fuerza motriz que empuja los fluidos desde la roca hasta la superficie~\cite{ref1}. Sin embargo, a medida que avanza la explotación del yacimiento, la presión disminuye progresivamente, por lo que para sostener la producción es necesario mantener o incrementar la presión mediante diferentes técnicas, entre las que destacan los métodos de \textbf{recuperación secundaria}, como la inyección de agua o gas.
+
+En este contexto, la correcta estimación de la presión es la piedra angular de la ingeniería de yacimientos moderna, influyendo en cada decisión, desde la perforación del primer pozo exploratorio hasta el abandono final del campo.
+
+Proponemos implementar un modelo predictivo que combine la física del reservorio con técnicas de data analytics, para poder estimar la presión de los yacimientos de hidrocarburos.
+
+En las siguientes secciones se describe en mayor detalle el problema a resolver, la solución propuesta, el impacto del proyecto en la industria, la planificación del desarrollo, la metodología a seguir y los mecanismos de validación del sistema.
 
 % ============================================================
 % 9. ESTADO DEL ARTE
 % ============================================================
 \section*{Estado del Arte}
 
-Texto del estado del arte.
+Antes de la llegada del análisis de datos a gran escala, la ingeniería de yacimientos se basaba en dos pilares metodológicos: el Análisis de Transientes de Presión (PTA por sus siglas en inglés) y la Ecuación de Balance de Materiales (EBM).
+
+El PTA es un enfoque dinámico que analiza la respuesta de la presión ante perturbaciones en el pozo. Incluye pruebas como drawdown y buildup, que permiten calcular parámetros locales como la permeabilidad promedio, el factor de daño (skin) y la presión promedio del área de drenaje. Su fortaleza radica en la alta resolución cerca del pozo, aunque con alcance espacial limitado.
+
+La EBM, por su parte, aplica la conservación de la masa tratando al yacimiento como un ``tanque'' a volumen constante. Facilita la estimación de POES/GOES, la identificación del mecanismo de empuje y la predicción del comportamiento futuro. Su análisis suele apoyarse en métodos gráficos como P/Z vs. Gp, aunque asume homogeneidad en el yacimiento.
+
+Ambos enfoques físicos, basados en los principios fundamentales de la física de fluidos en medios porosos, son complementarios y representan las herramientas clásicas que han permitido la caracterización y gestión de yacimientos durante décadas.
+
+En la actualidad, la industria vive una transición hacia el paradigma basado en datos~\cite{ref5}, impulsada por el crecimiento del volumen de datos proveniente de fuentes como adquisición sísmica, registros de perforación, sensores permanentes de pozos y laboratorios. El desafío ya no es la adquisición de datos, sino su integración, normalización e interpretación efectiva. La información a menudo reside en silos, en formatos dispares y con calidades variables, lo que dificulta la creación de una visión unificada y coherente del yacimiento.
+
+En este contexto, los métodos de data analytics y machine learning se posicionan como herramientas capaces de aprender directamente de los datos históricos. Estos modelos permiten:
+
+\begin{itemize}
+  \item Optimizar la producción, identificando patrones ocultos y anticipando problemas como la irrupción de agua o arena.
+  \item Mejorar la caracterización de yacimientos, integrando múltiples fuentes para generar modelos más precisos (ejemplo: incrementos del 30\% en la precisión de modelos geológicos reportados en la industria).
+  \item Habilitar el mantenimiento predictivo, anticipando fallos en equipos críticos mediante análisis de datos de sensores.
+  \item Reducir costos y riesgos, al mejorar la toma de decisiones en tiempo real y aumentar la seguridad operacional.
+\end{itemize}
+
+Entre los algoritmos más destacados se encuentran:
+
+\begin{itemize}
+  \item \textbf{Redes Neuronales Artificiales (ANN):} sobresalientes en mapeos complejos, con resultados que superan correlaciones empíricas.
+  \item \textbf{Random Forest y XGBoost:} robustos y eficientes para predicción de presiones críticas (p. ej., presión de burbuja, presión de poro).
+  \item \textbf{Support Vector Regression (SVR):} eficaz en espacios de alta dimensionalidad, mejorando su precisión mediante optimización de hiperparámetros.
+  \item \textbf{Redes LSTM:} especialistas en series temporales, ideales para pronósticos de producción y presión.
+\end{itemize}
+
+El avance más reciente es la integración de datos y física en enfoques híbridos. Los proxies de ML permiten generar predicciones en milisegundos tras ser entrenados con simulaciones numéricas, y las Redes Neuronales Informadas por la Física (PINNs)~\cite{ref6} incorporan ecuaciones diferenciales en su entrenamiento, garantizando consistencia física aun en ausencia de datos. Esto transforma el machine learning desde una ``caja negra'' hacia una verdadera herramienta de computación científica.
 
 % ============================================================
 % 10. PROBLEMA DETECTADO Y/O FALTANTE
 % ============================================================
 \section*{Problema detectado y/o faltante}
 
-Texto.
+Los métodos convencionales, aunque robustos y basados en principios físicos sólidos, muestran limitaciones significativas para manejar la escala y complejidad de los datos modernos:
+
+\begin{itemize}
+  \item \textbf{Costo computacional}: La simulación numérica de yacimientos, el estándar de oro para el modelado predictivo, es un proceso extremadamente intensivo en términos computacionales. Una sola simulación de un modelo de alta resolución puede tardar horas o incluso días en completarse, lo que hace inviable la exploración exhaustiva de incertidumbres o la optimización en tiempo real~\cite{ref2}.
+  \item \textbf{Simplificación excesiva}: Los modelos analíticos, como la EBM, deben hacer suposiciones simplificadoras (por ejemplo, tratar el yacimiento como un tanque homogéneo) para ser matemáticamente tratables. Esto puede pasar por alto la heterogeneidad espacial compleja que a menudo controla el flujo de fluidos en la realidad~\cite{ref3}.
+  \item \textbf{Análisis manual y lento}: La interpretación de pruebas de pozo o la calibración de un simulador (ajuste histórico) son procesos que tradicionalmente han requerido un esfuerzo manual significativo por parte de ingenieros expertos, lo que los convierte en procesos lentos y potencialmente subjetivos~\cite{ref4}.
+\end{itemize}
+
+En consecuencia, existe una brecha entre las necesidades actuales ---predicciones rápidas, robustas y capaces de integrar múltiples fuentes de datos--- y las capacidades de las metodologías tradicionales.
+
+Esta brecha justifica la \textbf{exploración de nuevos enfoques} basados en Machine Learning, que permitan aprovechar datos históricos para generar estimaciones de presión más ágiles, transparentes y escalables.
 
 % ============================================================
 % 11. SOLUCIÓN IMPLEMENTADA
 % ============================================================
 \section*{Solución implementada}
 
-Texto.
 
 % ============================================================
 % 12. METODOLOGÍA APLICADA
 % ============================================================
 \section*{Metodología aplicada}
 
-Texto.
+Para el desarrollo del proyecto planeamos seguir una metodología de software ágil e iterativa, con reuniones frecuentes para poder validar el progreso de forma temprana. Esto nos permitirá validar tempranamente la utilidad del sistema, incorporar correcciones sobre la marcha y reducir el riesgo de desviaciones mayores en etapas avanzadas.
+
+\subsection{Roles}
+
+\begin{itemize}
+  \item \textbf{Estudiantes:} el rol principal de los estudiantes será la implementación del sistema, junto con la validación y documentación del mismo.
+  \item \textbf{Tutores:} los tutores Hernán Merlino y Gabriela Savioli acompañarán a los estudiantes a lo largo del proyecto, supervisando los avances, resolviendo dudas tanto técnicas como del dominio del problema, y validando los entregables.
+\end{itemize}
+
+\subsection{Proceso de desarrollo del producto}
+
+Para este proyecto usaremos la metodología Scrum con la que todos estamos familiarizados. Se van a definir las user stories con los tutores y quienes correspondan para poder estimarlas, así como definir la longitud de los sprints.
+
+Elegimos Scrum porque es una metodología ágil con la que todos estamos familiarizados y facilita la realización del proyecto en pequeños incrementos y la separación de responsabilidades.
+
+\subsection{Riesgos iniciales del proyecto}
+
+\begin{itemize}
+  \item Conocimiento limitado del dominio.
+  \item Dependencia de datos de la industria.
+  \item Limitaciones de hardware para el entrenamiento del modelo.
+  \item Dificultad para integrar diferentes fuentes de información heterogénea.
+\end{itemize}
 
 % ============================================================
 % 13. HERRAMIENTAS EXTERNAS UTILIZADAS
 % ============================================================
 \section*{Herramientas externas utilizadas}
 
-Texto.
 
 % ============================================================
 % 14. EXPERIMENTACIÓN Y/O VALIDACIÓN
 % ============================================================
 \section*{Experimentación y/o validación}
 
-Texto.
 
 % Ejemplo de figura numerada con descripción:
 % \begin{figure}[ht]
@@ -249,7 +328,23 @@ Texto.
 % ============================================================
 \section*{Impactos sociales y ambientales del proyecto}
 
-Texto.
+Actualizar esto:
+
+Una estimación precisa de la presión de yacimiento es indispensable en la producción de hidrocarburos, ya que define un estrecho ``margen de presión'' operativo que es fundamental para la seguridad, la eficiencia y la rentabilidad.
+
+En este contexto, la solución propuesta puede tener impacto en distintos aspectos de la industria:
+
+\subsection{Impacto económico}
+
+\begin{itemize}
+  \item \textbf{Optimización de la producción}: permite una mejor planificación de las estrategias de extracción y selección de métodos de recuperación adecuados, reduciendo costos operativos.
+\end{itemize}
+
+\subsection{Impacto social y ambiental}
+
+\begin{itemize}
+  \item \textbf{Reducción de riesgos:} una correcta estimación de la presión puede evitar consecuencias catastróficas como la pérdida de equipos, daños medioambientales e incluso la pérdida de vidas humanas.
+\end{itemize}
 
 % ============================================================
 % 18. TRABAJOS FUTUROS (OPCIONAL)
@@ -290,7 +385,17 @@ Texto.
 \addcontentsline{toc}{section}{Referencias}
 
 \begin{thebibliography}{99}
-  \bibitem{ref1} Autor, A. (Año). \textit{Título}. Editorial.
+  \bibitem{ref1} Barriol, Y. (2005). \textit{Las presiones de las operaciones de perforación y producción}. Oilfield Review, 22. \url{https://usuarios.geofisica.unam.mx/gvazquez/geoquimpetrolFI/zonadesplegar/Lecturas/Las\%20presiones\%20de\%20las\%20operaciones\%20\%20de\%20perforacion\%20y\%20producc.pdf}
+
+  \bibitem{ref2} Maarouf, A., Tahir, S., Su, S., Kloucha, C. K., \& Mustapha, H. (2023). \textit{A comparative study for deep-learning-based methods for automated reservoir simulation}. SPE Reservoir Characterisation and Simulation Conference and Exhibition. \url{https://www.researchgate.net/publication/367379296_A_Comparative_Study_for_Deep-Learning-Based_Methods_for_Automated_Reservoir_Simulation}
+
+  \bibitem{ref3} Chen, X., Zhang, K., Ji, Z., Shen, X., Liu, P., Zhang, L., Wang, J., \& Yao, J. (2023). \textit{Progress and Challenges of Integrated Machine Learning and Traditional Numerical Algorithms: Taking Reservoir Numerical Simulation as an Example}. Mathematics, 11(21), 4418. \url{https://www.mdpi.com/2227-7390/11/21/4418}
+
+  \bibitem{ref4} El Hannaoui, M. (2025). \textit{Artificial Intelligence in Oil and Gas: How AI is Transforming Reservoir Engineering}. Novi Labs. \url{https://novilabs.com/blog/ai-in-reservoir-engineering-how-artificial-intelligence-is-transforming-oil-gas/}
+
+  \bibitem{ref5} Ali, A. (2021). \textit{Machine learning based data-driven methods for modelling and simulation of pressure dynamics and fluid flow in natural gas reservoirs} (Tesis doctoral, University of Sheffield). \url{https://etheses.whiterose.ac.uk/id/eprint/29161/1/Aliyuda_Final_Thesis.pdf}
+
+  \bibitem{ref6} Raissi, M., Perdikaris, P., \& Karniadakis, G. E. (2019). \textit{Physics-Informed Neural Networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations}. Journal of Computational Physics, 378, 686-707. \url{https://www.sciencedirect.com/science/article/abs/pii/S0021999118307125}
 \end{thebibliography}
 
 % ============================================================
