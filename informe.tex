@@ -483,6 +483,29 @@ reales con el esquema que necesitamos (presión del reservorio en función de va
 y propiedades del fluido, a lo largo del tiempo) es difícil sin una colaboración directa con una empresa petrolera,
 ya que se trata de información sensible que las operadoras manejan bajo confidencialidad.
 
+Para generar los datos sintéticos utilizamos el simulador OPM Flow, junto con una herramienta que desarrollamos
+en Python para poder extraer los datos que necesitamos.
+El simulador OPM Flow toma como input un modelo de reservorio definido en el formato ECLIPSE, que contiene toda la descripción física del
+campo: la geometría del reservorio, las propiedades de la roca, la tabla PVT del fluido, la
+configuración de los pozos y el cronograma operativo de producción e inyección. A partir de esa
+entrada, OPM Flow simula el proceso productivo paso a paso en el tiempo y genera archivos
+con el historial completo del estado del reservorio, capturando variables como la presión,
+los caudales de producción e inyección, las saturaciones de cada fase y demás propiedades por celda.
+
+En concreto, utilizamos dos modelos de reservorios que representan campos reales del Mar del Norte y del
+Mar de Noruega: \textbf{Norne} y \textbf{Volve}. 
+Decidimos utilizar estos modelos ya que se trata de yacimientos genuinos que estuvieron en producción durante años,
+operados originalmente por la petrolera noruega Equinor. Además, son dos de los benchmarks más populares en la 
+industria y la academia. La mayoría de los otros modelos públicos disponibles son reservorios teóricos
+inventados con fines académicos, sin correspondencia con un campo concreto.
+
+Para otorgarle variabilidad al dataset, ejecutamos distintas simulaciones, variando ciertos parámetros del reservorio en cada
+una, de manera de obtener corridas con comportamientos distintos. Las variables que ajustamos
+fueron la porosidad de la roca, su permeabilidad, la presión inicial del reservorio y 
+el esquema de inyección de agua. 
+Esto nos permitió obtener un dataset con suficiente diversidad de comportamientos, de modo que el modelo aprenda patrones
+generalizables en lugar de memorizar una única trayectoria de presión.
+
 
 \subsubsection{Aplicación Web}
 
