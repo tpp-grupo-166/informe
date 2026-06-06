@@ -30,14 +30,26 @@
 % ====== DATOS DEL TRABAJO ======
 \newcommand{\tituloTrabajo}{Data Analytics para la estimación de la presión de yacimientos de petróleo}
 
+
+% Estilo para el índice: igual que el resto pero sin número de página
+\fancypagestyle{indice}{%
+  \fancyhf{}
+  \fancyhead[C]{\fontsize{11}{13}\selectfont \tituloTrabajo}
+  \fancyfoot[L]{\fontsize{11}{13}\selectfont Bragantini, Palopoli, Rico, Valdevenito}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+
 % ====== ENCABEZADO Y PIE DE PÁGINA ======
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[C]{\fontsize{11}{13}\selectfont \tituloTrabajo}
-\fancyfoot[L]{\fontsize{11}{13}\selectfont Bragantini, Palopoli, Rico, Valdevenito}
-\fancyfoot[R]{\fontsize{11}{13}\selectfont \thepage}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\footrulewidth}{0.4pt}
+\fancypagestyle{fancy}{%
+  \fancyhf{}
+  \fancyhead[C]{\fontsize{11}{13}\selectfont \tituloTrabajo}
+  \fancyfoot[L]{\fontsize{11}{13}\selectfont Bragantini, Palopoli, Rico, Valdevenito}
+  \fancyfoot[R]{\fontsize{11}{13}\selectfont \thepage}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
 
 % Estilo para la carátula y páginas sin numeración visible
 \fancypagestyle{plain}{%
@@ -45,6 +57,15 @@
   \fancyhead[C]{\fontsize{11}{13}\selectfont \tituloTrabajo}
   \fancyfoot[L]{\fontsize{11}{13}\selectfont Bragantini, Palopoli, Rico, Valdevenito}
   \fancyfoot[R]{\fontsize{11}{13}\selectfont \thepage}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+% Estilo para el índice: igual que el resto pero sin número de página
+\fancypagestyle{indice}{%
+  \fancyhf{}
+  \fancyhead[C]{\fontsize{11}{13}\selectfont \tituloTrabajo}
+  \fancyfoot[L]{\fontsize{11}{13}\selectfont Bragantini, Palopoli, Rico, Valdevenito}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -91,10 +112,25 @@
 
 \end{titlepage}
 
+
+% ============================================================
+% ÍNDICE
+% ============================================================
+
+
+\clearpage
+\pagestyle{indice}
+\tableofcontents
+\thispagestyle{indice}
+\clearpage
+
+\pagestyle{fancy}
+
 % ============================================================
 % 2. AVAL DEL DIRECTOR
 % ============================================================
-\section*{Aval del Director}
+\setcounter{page}{1}
+\section{Aval del Director}
 
 
 \bigskip
@@ -117,8 +153,7 @@ cuenta con mi aval para su presentación y defensa.
 % 3. RESUMEN
 % ============================================================
 \newpage
-\section*{Resumen}
-\addcontentsline{toc}{section}{Resumen}
+\section{Resumen}
 
 La estimación precisa de la presión en yacimientos de petróleo es un factor crítico para la gestión
 eficiente de la producción de hidrocarburos. Los métodos tradicionales, basados en la física de
@@ -145,8 +180,7 @@ toma de decisiones en la industria energética.
 % ============================================================
 % 4. PALABRAS CLAVE
 % ============================================================
-\section*{Palabras clave}
-\addcontentsline{toc}{section}{Palabras clave}
+\section{Palabras clave}
 
 Yacimiento de petróleo, machine learning, estimación de presión, física de reservorio, recuperación secundaria.
 
@@ -154,8 +188,7 @@ Yacimiento de petróleo, machine learning, estimación de presión, física de r
 % 5. ABSTRACT
 % ============================================================
 \newpage
-\section*{Abstract}
-\addcontentsline{toc}{section}{Abstract}
+\section{Abstract}
 
 Accurate estimation of reservoir pressure is a key factor in the efficient management of hydrocarbon
 production. Traditional methods, based on reservoir physics, present limitations when dealing with the
@@ -179,8 +212,7 @@ the delivery of a transparent and scalable tool that supports decision-making in
 % ============================================================
 % 6. KEYWORDS
 % ============================================================
-\section*{Keywords}
-\addcontentsline{toc}{section}{Keywords}
+\section{Keywords}
 
 Oil reservoir, machine learning, pressure estimation, reservoir physics, secondary recovery.
 
@@ -188,8 +220,7 @@ Oil reservoir, machine learning, pressure estimation, reservoir physics, seconda
 % 7. AGRADECIMIENTOS (OPCIONAL)
 % ============================================================
 \newpage
-\section*{Agradecimientos}
-\addcontentsline{toc}{section}{Agradecimientos}
+\section{Agradecimientos}
 
 Texto de agradecimientos (sección opcional).
 
@@ -201,7 +232,7 @@ Texto de agradecimientos (sección opcional).
 % ============================================================
 % 8. INTRODUCCIÓN
 % ============================================================
-\section*{Introducción}
+\section{Introducción}
 
 La extracción de petróleo es un proceso que se lleva a cabo en formaciones subterráneas conocidas como
 yacimientos, donde el hidrocarburo, junto con otras sustancias como gas y agua, se encuentra almacenado en
@@ -231,7 +262,7 @@ mecanismos de validación del sistema.
 % ============================================================
 % 9. ESTADO DEL ARTE
 % ============================================================
-\section*{Estado del Arte}
+\section{Estado del Arte}
 
 Antes de la llegada del análisis de datos a gran escala, la ingeniería de yacimientos se basaba en dos
 pilares metodológicos: el Análisis de Transientes de Presión (PTA por sus siglas en inglés) y la Ecuación
@@ -294,7 +325,7 @@ learning desde una ``caja negra'' hacia una verdadera herramienta de computació
 % ============================================================
 % 10. PROBLEMA DETECTADO Y/O FALTANTE
 % ============================================================
-\section*{Problema detectado y/o faltante}
+\section{Problema detectado y/o faltante}
 
 Los métodos convencionales, aunque robustos y basados en principios físicos sólidos, muestran limitaciones
 significativas para manejar la escala y complejidad de los datos modernos:
@@ -320,10 +351,12 @@ capaces de integrar múltiples fuentes de datos--- y las capacidades de las meto
 Esta brecha justifica la \textbf{exploración de nuevos enfoques} basados en Machine Learning, que permitan
 aprovechar datos históricos para generar estimaciones de presión más ágiles, transparentes y escalables.
 
+\newpage
+
 % ============================================================
 % 11. SOLUCIÓN IMPLEMENTADA
 % ============================================================
-\section*{Solución implementada}
+\section{Solución implementada}
 
 La solución implementada es una aplicación web que realizar estimaciones de la presión de un reservorio mediante un modelo
 de machine learning. El sistema toma como entrada un conjunto de datos cargados por el usuario y, a partir
@@ -369,7 +402,7 @@ Además, la aplicación está diseñada con una arquitectura modular que separa 
 % ============================================================
 % 12. METODOLOGÍA APLICADA
 % ============================================================
-\section*{Metodología aplicada}
+\section{Metodología aplicada}
 
 Se deberá explicar cómo y en qué grado se cumplieron las pautas siguientes:
 
@@ -390,7 +423,7 @@ Se deberá explicar cómo y en qué grado se cumplieron las pautas siguientes:
 % ============================================================
 % 13. HERRAMIENTAS EXTERNAS UTILIZADAS
 % ============================================================
-\section*{Herramientas externas utilizadas}
+\section{Herramientas externas utilizadas}
 
 \subsection*{Modelo de Machine Learning}
 
@@ -435,7 +468,7 @@ de datos como visualización e interacción con el usuario.
 % ============================================================
 % 14. EXPERIMENTACIÓN Y/O VALIDACIÓN
 % ============================================================
-\section*{Experimentación y/o validación}
+\section{Experimentación y/o validación}
 
 
 % Ejemplo de figura numerada con descripción:
@@ -461,21 +494,21 @@ de datos como visualización e interacción con el usuario.
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
 % ============================================================
-\section*{Cronograma de las actividades realizadas}
+\section{Cronograma de las actividades realizadas}
 
 Texto.
 
 % ============================================================
 % 16. RIESGOS MATERIALIZADOS Y LECCIONES APRENDIDAS
 % ============================================================
-\section*{Riesgos materializados y Lecciones aprendidas}
+\section{Riesgos materializados y Lecciones aprendidas}
 
 Texto.
 
 % ============================================================
 % 17. IMPACTOS SOCIALES Y AMBIENTALES DEL PROYECTO
 % ============================================================
-\section*{Impactos sociales y ambientales del proyecto}
+\section{Impactos sociales y ambientales del proyecto}
 
 Actualizar esto:
 
@@ -502,40 +535,28 @@ En este contexto, la solución propuesta puede tener impacto en distintos aspect
 % ============================================================
 % 18. TRABAJOS FUTUROS (OPCIONAL)
 % ============================================================
-\section*{Trabajos futuros}
+\section{Trabajos futuros}
 
 Texto (sección opcional).
 
 % ============================================================
 % 19. CONCLUSIONES
 % ============================================================
-\section*{Conclusiones}
+\section{Conclusiones}
 
 Texto.
 
 % ============================================================
 % 20. APORTES INDIVIDUALES
 % ============================================================
-\section*{Aportes individuales}
+\section{Aportes individuales}
 
-\subsection{Bragantini}
-Texto.
-
-\subsection{Palopoli}
-Texto.
-
-\subsection{Rico}
-Texto.
-
-\subsection{Valdevenito}
-Texto.
 
 % ============================================================
 % 21. REFERENCIAS
 % ============================================================
 \newpage
-\section*{Referencias}
-\addcontentsline{toc}{section}{Referencias}
+\section{Referencias}
 
 \begin{thebibliography}{99}
   \bibitem{ref1} Barriol, Y. (2005). \textit{Las presiones de las operaciones de perforación y
@@ -571,7 +592,7 @@ Texto.
 % 22. ANEXOS
 % ============================================================
 \newpage
-\section*{Anexos}
+\section{Anexos}
 
 Contenido de los anexos.
 
