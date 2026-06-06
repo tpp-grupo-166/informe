@@ -395,10 +395,70 @@ Sin embargo, nos decantamos por LSTM ya que resultó ser el más efectivo de tod
 
 \paragraph{Esquema de datos}
 
-El esquema de columnas del dataset fue propuesto por nuestros tutores con un objetivo concreto: 
-que el modelo tenga a disposición toda la información que aparece en la \textbf{ecuación de balance de masa},
-que es la ecuación física que gobierna la evolución de la presión del reservorio. La MBE relaciona la producción
-acumulada de fluidos, la inyección acumulada y las propiedades termodinámicas del fluido.
+El esquema de columnas del dataset fue propuesto por nuestros tutores con un objetivo concreto: que el modelo tenga 
+a disposición toda la información que aparece en la \textbf{ecuación de balance de masa}, que es la 
+ecuación física que gobierna la evolución de la presión del reservorio. La MBE relaciona la producción acumulada 
+de fluidos, la inyección acumulada, las propiedades termodinámicas del fluido y la geometría del reservorio con el 
+cambio de presión observado en el tiempo. 
+
+El dataset consta de dos tablas. La primera (Tabla~\ref{tab:dataset-produccion}) tiene una fila por (simulación, timestep) e integra la petrofísica y la geometría del reservorio junto con los caudales y las cumuladas históricas de producción e inyección. La segunda (Tabla~\ref{tab:dataset-pvt}) describe las propiedades termodinámicas del fluido medidas en laboratorio, tabuladas en función de la presión. Esta segunda tabla es una por reservorio, ya que el fluido es una propiedad intrínseca del campo y no depende de la corrida específica.
+
+\begin{table}[ht]
+\centering
+\caption{Esquema de la tabla de producción e inyección. Cada fila corresponde a una simulación en un timestep determinado.}
+\label{tab:dataset-produccion}
+\footnotesize
+\begin{tabular}{|l|c|c|l|p{4.5cm}|}
+\hline
+\textbf{Nombre} & \textbf{Símbolo} & \textbf{Unidad} & \textbf{Tipo} & \textbf{Descripción} \\
+\hline
+\texttt{tiempo\_dias} & -- & -- & -- & Tiempo en días desde el comienzo de la producción. \\
+\hline
+\texttt{Porosidad} & $\phi$ & fracción & Estática (Petrofísica) & Fracción de espacio vacío en la matriz rocosa. \\
+\hline
+\texttt{Permeabilidad\_mD} & $k$ & mD & Estática (Petrofísica) & Capacidad de la roca para permitir el flujo de fluidos. \\
+\hline
+\texttt{Espesor\_Neto\_m} & $h$ & m & Estática (Geometría) & Espesor productivo neto de la formación. \\
+\hline
+\texttt{Area} & $A$ & m$^2$ & Estática (Geometría) & Área total de roca; multiplicada por $h$ se obtiene el volumen total de roca. \\
+\hline
+\texttt{Caudal\_Prod\_Petroleo\_bbl} & $q_o$ & bbl/d & Dinámica (Operativa) & Volumen diario de petróleo extraído en superficie. \\
+\hline
+\texttt{Caudal\_Prod\_Gas\_Mpc} & $Q_g$ & Mpc/d & Dinámica (Operativa) & Volumen diario de gas producido. \\
+\hline
+\texttt{Caudal\_Iny\_Agua\_bbl} & $q_{winj}$ & bbl/d & Dinámica (Operativa) & Volumen diario de agua inyectada al reservorio. \\
+\hline
+\texttt{Prod\_Acumulada\_Petroleo} & $N_p$ & bbl & Dinámica (Histórica) & Sumatoria histórica del volumen de petróleo extraído. \\
+\hline
+\texttt{Prod\_Acumulada\_Gas} & $G_p$ & scf & Dinámica (Histórica) & Sumatoria histórica del volumen de gas extraído. \\
+\hline
+\texttt{Prod\_Acumulada\_Agua} & $W_p$ & bbl & Dinámica (Histórica) & Sumatoria histórica del volumen de agua extraída. \\
+\hline
+\texttt{Iny\_Acumulada\_Agua} & $W_{inj}$ & bbl & Dinámica (Histórica) & Sumatoria histórica del volumen de agua inyectada. \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Esquema de la tabla PVT. Contiene las propiedades termodinámicas del fluido del reservorio medidas en laboratorio en función de la presión. Es una tabla por reservorio.}
+\label{tab:dataset-pvt}
+\footnotesize
+\begin{tabular}{|l|c|c|l|p{4.5cm}|}
+\hline
+\textbf{Nombre} & \textbf{Símbolo} & \textbf{Unidad} & \textbf{Tipo} & \textbf{Descripción} \\
+\hline
+\texttt{p\_grid\_psi} & $P$ & psi & Termodinámica (PVT) & Presión a la cual se miden las propiedades termodinámicas. \\
+\hline
+\texttt{Bo\_rb\_stb} & $B_o$ & rb/stb & Termodinámica (PVT) & Factor volumétrico del petróleo (relación fondo-superficie). \\
+\hline
+\texttt{Bg\_rb\_scf} & $B_g$ & rb/scf & Termodinámica (PVT) & Factor volumétrico del gas (relación fondo-superficie). \\
+\hline
+\texttt{Rs\_scf\_stb} & $R_s$ & scf/stb & Termodinámica (PVT) & Relación de gas disuelto por barril de petróleo. \\
+\hline
+\end{tabular}
+\end{table}
+
 
 
 \subsubsection{Aplicación Web}
