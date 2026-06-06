@@ -401,7 +401,13 @@ ecuación física que gobierna la evolución de la presión del reservorio. La M
 de fluidos, la inyección acumulada, las propiedades termodinámicas del fluido y la geometría del reservorio con el 
 cambio de presión observado en el tiempo. 
 
-El dataset consta de dos tablas. La primera (Tabla~\ref{tab:dataset-produccion}) tiene una fila por (simulación, timestep) e integra la petrofísica y la geometría del reservorio junto con los caudales y las cumuladas históricas de producción e inyección. La segunda (Tabla~\ref{tab:dataset-pvt}) describe las propiedades termodinámicas del fluido medidas en laboratorio, tabuladas en función de la presión. Esta segunda tabla es una por reservorio, ya que el fluido es una propiedad intrínseca del campo y no depende de la corrida específica.
+El dataset consta de dos tablas, cada tabla representa los datos de un reservorio en particular.
+
+La primera (Tabla~\ref{tab:dataset-produccion}) tiene una fila por timestep e integra la petrofísica
+y la geometría del reservorio junto con los caudales de producción e inyección.
+
+La segunda (Tabla~\ref{tab:dataset-pvt}) describe las propiedades termodinámicas 
+del fluido medidas en laboratorio, tabuladas en función de la presión.
 
 \begin{table}[ht]
 \centering
