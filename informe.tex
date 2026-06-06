@@ -495,12 +495,55 @@ operados originalmente por la petrolera noruega Equinor. Además, son dos de los
 industria y la academia. La mayoría de los otros modelos públicos disponibles son reservorios teóricos
 inventados con fines académicos, sin correspondencia con un campo concreto.
 
-Para otorgarle variabilidad al dataset, ejecutamos distintas simulaciones, variando ciertos parámetros del reservorio en cada
+Para otorgarle variabilidad al dataset, ejecutamos distintas simulaciones (30 simulaciones del modelo Norne,
+y 10 simulaciones del modelo Volve), variando ciertos parámetros del reservorio en cada
 una, de manera de obtener corridas con comportamientos distintos. Las variables que ajustamos
 fueron la porosidad de la roca, su permeabilidad, la presión inicial del reservorio y 
 el esquema de inyección de agua. 
 Esto nos permitió obtener un dataset con suficiente diversidad de comportamientos, de modo que el modelo aprenda patrones
 generalizables en lugar de memorizar una única trayectoria de presión.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/caudal_inyeccion_agua_norne.png}
+  \caption{Caudal de inyección de agua (simulaciones Norne)}
+  \label{fig:caudal_iny_norne}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/caudal_inyeccion_agua_volve.png}
+  \caption{Caudal de inyección de agua (simulaciones Volve)}
+  \label{fig:caudal_iny_volve}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/produccion_acumulada_petroleo_agua_norne.png}
+  \caption{Producción acumulada de petróleo y agua (simulaciones Norne)}
+  \label{fig:prod_acumulada_norne}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/produccion_acumulada_petroleo_agua_volve.png}
+  \caption{Producción acumulada de petróleo y agua (simulaciones Volve)}
+  \label{fig:prod_acumulada_volve}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/trayectorias_presion_norne.png}
+  \caption{Presión en función del tiempo (simulaciones Norne)}
+  \label{fig:presion_norne}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/trayectorias_presion_volve.png}
+  \caption{Presión en función del tiempo (simulaciones Volve)}
+  \label{fig:presion_volve}
+\end{figure}
 
 
 \subsubsection{Aplicación Web}
