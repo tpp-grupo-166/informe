@@ -472,6 +472,17 @@ del fluido medidas en laboratorio, tabuladas en función de la presión.
 El \textbf{target} del modelo es la presión promedio del reservorio en cada timestep ($P_r$), una columna adicional
 del primer dataset que no se usa como input sino como variable a predecir. 
 
+\paragraph{Generación de datos sintéticos}
+
+Para entrenar el modelo LSTM utilizamos datos sintéticos. La razón principal es que conseguir datos
+reales con el esquema que necesitamos (presión del reservorio en función de variables operativas y
+propiedades del fluido a lo largo del tiempo) es prácticamente imposible para un proyecto académico, 
+
+Para entrenar el modelo LSTM utilizamos datos sintéticos. La razón principal es que conseguir datos
+reales con el esquema que necesitamos (presión del reservorio en función de variables operativas 
+y propiedades del fluido, a lo largo del tiempo) es difícil sin una colaboración directa con una empresa petrolera,
+ya que se trata de información sensible que las operadoras manejan bajo confidencialidad.
+
 
 \subsubsection{Aplicación Web}
 
