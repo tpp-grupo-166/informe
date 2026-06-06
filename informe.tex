@@ -385,6 +385,22 @@ En las siguientes secciones se detalla cada componente en profundidad.
 
 \subsubsection{Modelo de Machine Learning}
 
+El objetivo del modelo es predecir, a lo largo del tiempo, la presión promedio del reservorio a partir de datos operativos
+y de las propiedades del fluido.
+
+Para este proyecto utilizamos un modelo de tipo LSTM (Long Short-Term Memory).
+Para la elección del mismo, se realizaron múltiples pruebas con distintos modelos: 
+regresión lineal, random forests, XGBoost y series de tiempo. 
+Sin embargo, nos decantamos por LSTM ya que resultó ser el más efectivo de todos.
+
+\paragraph{Esquema de datos}
+
+El esquema de columnas del dataset fue propuesto por nuestros tutores con un objetivo concreto: 
+que el modelo tenga a disposición toda la información que aparece en la \textbf{ecuación de balance de masa},
+que es la ecuación física que gobierna la evolución de la presión del reservorio. La MBE relaciona la producción
+acumulada de fluidos, la inyección acumulada y las propiedades termodinámicas del fluido.
+
+
 \subsubsection{Aplicación Web}
 
 El sistema está compuesto por una arquitectura cliente-servidor, donde el frontend permite la interacción con el usuario y 
