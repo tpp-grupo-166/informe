@@ -12,6 +12,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{hyperref}
+\usepackage{float}
 
 % ====== INTERLINEADO 1,5 ======
 \onehalfspacing
@@ -378,7 +379,7 @@ predicho sino también el grado de confianza del modelo.
 
 El sistema está compuesto una aplicación web (frontend y backend) y un modelo de machine learning.
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/arquitectura.png}
   \caption{Diagrama de arquitectura del sistema}
@@ -413,7 +414,7 @@ y la geometría del reservorio junto con los caudales de producción e inyecció
 La segunda (Tabla~\ref{tab:dataset-pvt}) describe las propiedades termodinámicas 
 del fluido medidas en laboratorio, tabuladas en función de la presión.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \footnotesize
 \begin{tabular}{|l|c|c|l|p{4.5cm}|}
@@ -449,7 +450,7 @@ del fluido medidas en laboratorio, tabuladas en función de la presión.
 \label{tab:dataset-produccion}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \footnotesize
 \begin{tabular}{|l|c|c|l|p{4.5cm}|}
@@ -503,42 +504,42 @@ el esquema de inyección de agua.
 Esto nos permitió obtener un dataset con suficiente diversidad de comportamientos, de modo que el modelo aprenda patrones
 generalizables en lugar de memorizar una única trayectoria de presión.
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/caudal_inyeccion_agua_norne.png}
   \caption{Caudal de inyección de agua (simulaciones Norne)}
   \label{fig:caudal_iny_norne}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/caudal_inyeccion_agua_volve.png}
   \caption{Caudal de inyección de agua (simulaciones Volve)}
   \label{fig:caudal_iny_volve}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/produccion_acumulada_petroleo_agua_norne.png}
   \caption{Producción acumulada de petróleo y agua (simulaciones Norne)}
   \label{fig:prod_acumulada_norne}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/produccion_acumulada_petroleo_agua_volve.png}
   \caption{Producción acumulada de petróleo y agua (simulaciones Volve)}
   \label{fig:prod_acumulada_volve}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/trayectorias_presion_norne.png}
   \caption{Presión en función del tiempo (simulaciones Norne)}
   \label{fig:presion_norne}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/trayectorias_presion_volve.png}
   \caption{Presión en función del tiempo (simulaciones Volve)}
@@ -646,7 +647,7 @@ de datos como visualización e interacción con el usuario.
 
 
 % Ejemplo de figura numerada con descripción:
-% \begin{figure}[ht]
+% \begin{figure}[H]
 % \centering
 % \includegraphics[width=0.7\textwidth]{imagen.png}
 % \caption{Breve descripción de la figura.}
@@ -654,7 +655,7 @@ de datos como visualización e interacción con el usuario.
 % \end{figure}
 
 % Ejemplo de tabla numerada con descripción:
-% \begin{table}[ht]
+% \begin{table}[H]
 % \centering
 % \caption{Breve descripción de la tabla.}
 % \begin{tabular}{|c|c|}
