@@ -325,6 +325,21 @@ aprovechar datos históricos para generar estimaciones de presión más ágiles,
 % ============================================================
 \section*{Solución implementada}
 
+La solución implementada es una aplicación web que permite realizar estimaciones de presión, a partir de 
+la carga de datos de un reservorio. Los datos incluyen información sobre la producción, datos operativos,
+datos físicos del reservorio, e información termodinámica sobre el petróleo del reservorio.
+
+La solución implementada es una aplicación web que estima la presión de un reservorio mediante un modelo
+de machine learning. El sistema toma como entrada un conjunto de datos cargados por el usuario y, a partir
+de ellos, genera una predicción de la presión del reservorio.
+
+La información requerida comprende datos de producción, que corresponden a series temporales registradas
+a lo largo de la vida del reservorio, datos físicos del reservorio, e información termodinámica del petróleo del reservorio.
+
+Una vez cargados los datos, el modelo procesa estas distintas fuentes de información para producir la estimación
+de presión. La aplicación presenta los resultados de forma visual, mediante gráficos que muestran tanto la presión
+estimada como la incertidumbre asociada a dicha estimación, permitiendo al usuario interpretar no solo el valor
+predicho sino también el grado de confianza del modelo.
 
 % ============================================================
 % 12. METODOLOGÍA APLICADA
