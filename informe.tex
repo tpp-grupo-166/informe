@@ -337,6 +337,35 @@ de presión. La aplicación presenta los resultados de forma visual, mediante gr
 estimada como la incertidumbre asociada a dicha estimación, permitiendo al usuario interpretar no solo el valor
 predicho sino también el grado de confianza del modelo.
 
+\subsection*{Modelo de Machine Learning}
+
+\subsection*{Aplicación Web}
+
+El sistema está compuesto por una arquitectura cliente-servidor, donde el frontend permite la interacción con el usuario y 
+el backend se encarga del procesamiento de datos, autenticación y ejecución del modelo predictivo.
+
+La aplicación permite a los usuarios registrarse e iniciar sesión, gestionando el acceso a las funcionalidades mediante 
+autenticación. Una vez dentro del sistema, el usuario puede cargar diferentes tipos de datos necesarios para la estimación:
+\begin{itemize}
+\item Datos de producción en formato CSV (series temporales).
+\item Datos PVT (propiedades termodinámicas del fluido).
+\item Parámetros del reservorio en formato estructurado (por ejemplo, archivos TOML).
+\end{itemize}
+
+Estos datos son procesados por el backend —desarrollado en Python— que integra un modelo de machine learning previamente 
+entrenado. El modelo es capaz de combinar información temporal, física y termodinámica para generar una estimación de la 
+presión del reservorio.
+
+En cuanto a la visualización, el frontend —desarrollado con TypeScript y React— presenta los resultados de manera interactiva y 
+clara para el usuario. Se incluyen gráficos que permiten analizar la evolución de la presión estimada a lo largo del tiempo.
+
+Asimismo, la interfaz incorpora componentes que facilitan la interpretación de los resultados, permitiendo identificar la influencia 
+de las distintas variables de entrada en el comportamiento del modelo. De esta manera, no solo se muestra el valor estimado, sino que 
+también se brinda contexto para su análisis y comprensión.
+
+Además, la aplicación está diseñada con una arquitectura modular que separa claramente las responsabilidades en capas 
+(dominio, infraestructura, repositorios, rutas), facilitando la mantenibilidad y escalabilidad del sistema.
+
 % ============================================================
 % 12. METODOLOGÍA APLICADA
 % ============================================================
@@ -363,6 +392,45 @@ Se deberá explicar cómo y en qué grado se cumplieron las pautas siguientes:
 % ============================================================
 \section*{Herramientas externas utilizadas}
 
+\subsection*{Modelo de Machine Learning}
+
+\subsection*{Aplicación Web}
+
+Para el desarrollo de la aplicación web se utilizaron diversas herramientas y tecnologías, tanto para el backend como 
+para el frontend y el despliegue del sistema:
+
+\begin{itemize}
+\item \textbf{FastAPI}: framework web en Python utilizado para la construcción de la API REST, permitiendo un desarrollo rápido y 
+eficiente de endpoints.
+
+\item \textbf{PyTorch}: biblioteca de machine learning empleada para la definición, entrenamiento y ejecución del modelo predictivo 
+de presión.
+
+\item \textbf{NumPy y Pandas}: utilizadas para la manipulación y procesamiento de datos, especialmente en la carga y transformación 
+de archivos CSV.
+
+\item \textbf{Alembic}: herramienta de migraciones de base de datos, utilizada para gestionar cambios en el esquema de la base de datos.
+
+\item \textbf{SQLAlchemy}: ORM utilizado para la interacción con la base de datos desde el backend.
+
+\item \textbf{JWT (JSON Web Tokens)}: utilizado para la autenticación y autorización de usuarios dentro del sistema.
+
+\item \textbf{React}: biblioteca de JavaScript utilizada para la construcción de la interfaz de usuario.
+
+\item \textbf{TypeScript}: lenguaje utilizado en el frontend para mejorar la calidad del código mediante tipado estático.
+
+\item \textbf{Vite}: herramienta de desarrollo utilizada para el bundling y ejecución del frontend.
+
+\item \textbf{Charting libraries (gráficos)}: utilizadas para la visualización de resultados, incluyendo gráficos de presión y 
+análisis de variables.
+
+\item \textbf{Docker y Docker Compose}: utilizados para contenerizar la aplicación y facilitar su despliegue en diferentes entornos.
+
+\item \textbf{Git}: sistema de control de versiones utilizado para la gestión del código fuente.
+\end{itemize}
+
+Estas herramientas permitieron construir una solución robusta, escalable y mantenible, integrando tanto capacidades de procesamiento 
+de datos como visualización e interacción con el usuario.
 
 % ============================================================
 % 14. EXPERIMENTACIÓN Y/O VALIDACIÓN
