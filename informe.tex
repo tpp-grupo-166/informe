@@ -947,33 +947,31 @@ que predicen valores muy fuera del rango físico real.
 
 \subsection{Comparación final entre modelos}
 
-La Tabla \ref{tab:comparacion-final} resume las métricas de cada uno de los cuatro modelos
-sobre sus respectivos splits in-distribution y cross-reservoir. Dado que todos los modelos
-fueron entrenados con el mismo protocolo (24 simulaciones de Norne como train, 6 como test,
-las 10 simulaciones de Volve como evaluación cross-reservoir), la comparación es directa.
+Las Figuras \ref{fig:comparacion-mae} y \ref{fig:comparacion-r2} comparan visualmente las
+métricas de los cuatro modelos sobre los dos splits. Dado que todos fueron entrenados con el
+mismo protocolo (24 simulaciones de Norne como train, 6 como test, las 10 simulaciones de
+Volve como evaluación cross-reservoir), la comparación es directa.
 
-\begin{table}[ht]
+El gráfico de MAE usa escala logarítmica porque el rango de errores cubre tres órdenes de
+magnitud entre el mejor caso (XGBoost en Norne, 19.8 psi) y el peor (Ridge en Volve, más de
+8000 psi). En el gráfico de R², el valor del baseline en Volve ($-891.83$) está clipeado
+para no aplastar al resto de la escala; los demás valores se ven con claridad.
+
+\begin{figure}[H]
 \centering
-\caption{Comparación de métricas entre todos los modelos probados.}
-\label{tab:comparacion-final}
-\small
-\begin{tabular}{|l|c|c|c|c|}
-\hline
-\textbf{Modelo} & \multicolumn{2}{c|}{\textbf{Norne (in-distribution)}} &
-\multicolumn{2}{c|}{\textbf{Volve (cross-reservoir)}} \\
-\cline{2-5}
- & R² & MAE (psi) & R² & MAE (psi) \\
-\hline
-Regresión Ridge (baseline) & 0.959 & 35.23 & -891.83 & 8166.51 \\
-\hline
-Random Forest & 0.977 & 22.99 & -9.03 & 842.43 \\
-\hline
-XGBoost & 0.986 & 19.80 & -9.93 & 864.89 \\
-\hline
-LSTM con encoder de PVT & 0.910 & 51.70 & 0.735 & 101.90 \\
-\hline
-\end{tabular}
-\end{table}
+\includegraphics[width=0.95\textwidth]{img/validacion/comparacion_mae.png}
+\caption{Comparación del MAE entre los cuatro modelos, en Norne (in-distribution) y Volve
+(cross-reservoir). Escala logarítmica en el eje vertical.}
+\label{fig:comparacion-mae}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{img/validacion/comparacion_r2.png}
+\caption{Comparación del R² entre los cuatro modelos. El valor del baseline Ridge en Volve
+($-891.83$) está clipeado para no comprimir la escala del resto de las barras.}
+\label{fig:comparacion-r2}
+\end{figure}
 
 La conclusión principal del experimento es que los tres modelos clásicos no logran transferir
 entre reservorios. Cada uno alcanza valores in-distribution sobre Norne muy buenos, pero
