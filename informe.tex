@@ -753,7 +753,7 @@ Volve (cross-reservoir) & -891.83 & 8166.51 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/baseline_norne_parity.png}
-\caption{Parity plot entre la presión real de Norne vs la presión predicha por el modelo baseline}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo baseline}
 \label{fig:baseline-norne-parity}
 \end{figure}
 
@@ -767,32 +767,19 @@ Volve (cross-reservoir) & -891.83 & 8166.51 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/baseline_volve_parity.png}
-\caption{Parity plot entre la presión real de Volve vs la presión predicha por el modelo baseline}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo baseline}
 \label{fig:baseline-volve-parity}
 \end{figure}
 
-El modelo obtiene un ajuste muy bueno sobre Norne (R² = 0.96), gracias a que las features
-adimensionales y la presión inicial del reservorio le permiten al modelo recuperar la
-trayectoria de presión con gran precisión dentro de su distribución de entrenamiento. Sin
-embargo, al aplicarlo a Volve el comportamiento es catastrófico: el R² cae a valores
-fuertemente negativos y el MAE supera los 8000 psi. El modelo no captura la física común a
-los dos reservorios sino una relación lineal específica de la distribución de Norne, y al
-extrapolar a un reservorio con rangos distintos de presión y geometría produce predicciones
-fuera de cualquier valor físico razonable.
+A partir de los valores del coeficiente de determinación (0.959 para Norne, -891.83 para Volve), 
+se puede deducir que claramente el modelo overfittea para los datos de entrenamiento, y no logra
+extrapolar la predicción para reservorios con una distribución distinta a la de Norne.
 
-\subsection{Modelos clásicos de regresión}
 
-A partir del baseline probamos dos modelos más expresivos, ambos basados en árboles de
-decisión. El protocolo de entrenamiento y evaluación es idéntico al del baseline: train sobre
-24 simulaciones de Norne, test in-distribution sobre las 6 restantes, evaluación
-cross-reservoir sobre las 10 simulaciones de Volve. La búsqueda de hiperparámetros se hace con
-GridSearchCV usando un esquema GroupKFold de 5 folds.
+\subsection{Random Forest}
 
-\subsubsection{Random Forest}
-
-El primer modelo no lineal que probamos fue Random Forest, un ensamble de árboles de decisión
-entrenados con muestreo bootstrap. La motivación fue capturar interacciones no lineales entre
-las features que la regresión lineal no podía representar.
+Una vez realizadas las pruebas con un modelo baseline, procedimos a entrenar un modelo Random Forest,
+con el objetivo de capturar interacciones no lineales entre las features que la regresión lineal no podía representar.
 
 \begin{table}[ht]
 \centering
@@ -812,43 +799,41 @@ Volve (cross-reservoir) & -9.03 & 842.43 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/random_forest_norne_trayectoria.png}
-\caption{Random Forest, test in-distribution sobre Norne: trayectoria de presión de una
-simulación representativa.}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo random forest}
 \label{fig:rf-norne-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/random_forest_norne_parity.png}
-\caption{Random Forest, test in-distribution sobre Norne: parity plot global.}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo random forest}
 \label{fig:rf-norne-parity}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/random_forest_volve_trayectoria.png}
-\caption{Random Forest, evaluación cross-reservoir sobre Volve: trayectoria de presión de
-una simulación representativa.}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo random forest}
 \label{fig:rf-volve-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/random_forest_volve_parity.png}
-\caption{Random Forest, parity plot sobre Volve.}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo random forest}
 \label{fig:rf-volve-parity}
 \end{figure}
 
-Random Forest mejora todavía más al baseline sobre Norne: el R² sube de 0.96 a 0.98 y el MAE
-baja de 35 a 23 psi. En Volve, sin embargo, el modelo vuelve a fallar de manera consistente.
-El R² es de -9.03 y el MAE supera los 800 psi. Aunque las predicciones ya no son tan extremas
+Random Forest presenta una mejora respecto al modelo baseline sobre Norne: el R² sube de 0.96 a 0.98 y el MAE
+baja de 35 a 23 psi. Sin embargo, el modelo no logra extrapolar estos resultados al reservorio Volve,
+el R² es de -9.03 y el MAE supera los 800 psi. Aunque las predicciones ya no son tan extremas
 como las del baseline lineal, la incapacidad de generalizar fuera de la distribución de
 entrenamiento se mantiene.
 
-\subsubsection{XGBoost}
+\subsection{XGBoost}
 
-XGBoost es un ensamble de árboles entrenado por gradient boosting, que en general supera a
-Random Forest en problemas tabulares.
+El siguiente modelo a evaluar es XGBoost, es un modelo de árboles un poco más complejo,
+que en general supera a Random Forest en problemas tabulares.
 
 \begin{table}[ht]
 \centering
@@ -868,30 +853,28 @@ Volve (cross-reservoir) & -9.93 & 864.89 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/xgboost_norne_trayectoria.png}
-\caption{XGBoost, test in-distribution sobre Norne: trayectoria de presión de una simulación
-representativa.}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo XGBoost}
 \label{fig:xgb-norne-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/xgboost_norne_parity.png}
-\caption{XGBoost, test in-distribution sobre Norne: parity plot global.}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo XGBoost}
 \label{fig:xgb-norne-parity}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/xgboost_volve_trayectoria.png}
-\caption{XGBoost, evaluación cross-reservoir sobre Volve: trayectoria de presión de una
-simulación representativa.}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo XGBoost}
 \label{fig:xgb-volve-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/xgboost_volve_parity.png}
-\caption{XGBoost, parity plot sobre Volve.}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo XGBoost}
 \label{fig:xgb-volve-parity}
 \end{figure}
 
