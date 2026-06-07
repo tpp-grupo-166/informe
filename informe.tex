@@ -720,9 +720,11 @@ Para definir la calidad de los modelos, nos basamos en las siguientes métricas:
   \item \textbf{MAE (Mean Absolute Error)}: el error promedio absoluto en la misma unidad física que la presión del reservorio (psi).
 \end{itemize}
 
+\subsection{Análisis comparativo del rendimiento de los modelos de machine learning}
+
 A continuación se presenta un análisis comparativo de todos los modelos que se probaron durante la fase de entrenamiento.
 
-\subsection{Modelo baseline}
+\subsubsection{Modelo baseline}
 
 El primer modelo que probamos fue una regresión lineal con regularización Ridge sobre las
 features adimensionales del reservorio. Con este modelo no buscamos alcanzar buena performance, 
@@ -776,7 +778,7 @@ se puede deducir que claramente el modelo overfittea para los datos de entrenami
 extrapolar la predicción para reservorios con una distribución distinta a la de Norne.
 
 
-\subsection{Random Forest}
+\subsubsection{Random Forest}
 
 Una vez realizadas las pruebas con un modelo baseline, procedimos a entrenar un modelo Random Forest,
 con el objetivo de capturar interacciones no lineales entre las features que la regresión lineal no podía representar.
@@ -830,7 +832,7 @@ el R² es de -9.03 y el MAE supera los 800 psi. Aunque las predicciones ya no so
 como las del baseline lineal, la incapacidad de generalizar fuera de la distribución de
 entrenamiento se mantiene.
 
-\subsection{XGBoost}
+\subsubsection{XGBoost}
 
 El siguiente modelo a evaluar es XGBoost, es un modelo de árboles un poco más complejo,
 que en general supera a Random Forest en problemas tabulares.
@@ -884,7 +886,7 @@ mantiene la misma incapacidad de generalizar entre reservorios: el R² sobre Vol
 -9.93 y el MAE de 865 psi.
 
 
-\subsection{LSTM}
+\subsubsection{LSTM}
 
 En vista de que los modelos lineales y de árboles no son capaces de aprender la física subyacente
 del problema, decidimos probar un modelo LSTM, que suele tener buen rendimiento sobre datos basados
@@ -939,23 +941,23 @@ Norne como para Volve, es decir, es capaz de generalizar la predicción entre re
 En Norne, el modelo alcanza un R² de 0.91 en el test in-distribution, un valor
 algo más bajo que XGBoost en su propio reservorio (0.99). Sin embargo, el resultado más interesante
 está en los resultados de las predicciones de Volve, ya que se consigue un R² de 0.735 con un MAE 
-de 101.9 psi, mientras que los modelos clásicos no superaban valores negativos.
+de 101.9 psi, mientras que los otros modelos no superaban valores negativos.
 
 El modelo LSTM logra generar predicciones que mantienen la forma general de la trayectoria
 de presión de cada simulación de Volve, en contraste con los modelos lineales y de árboles,
 que predicen valores muy fuera del rango físico real.
 
-\subsection{Comparación final entre modelos}
+\subsubsection{Comparación final entre modelos}
 
-Las Figuras \ref{fig:comparacion-mae} y \ref{fig:comparacion-r2} comparan visualmente las
+Los gráficos \ref{fig:comparacion-mae} y \ref{fig:comparacion-r2} comparan visualmente las
 métricas de los cuatro modelos sobre los dos splits. Dado que todos fueron entrenados con el
 mismo protocolo (24 simulaciones de Norne como train, 6 como test, las 10 simulaciones de
 Volve como evaluación cross-reservoir), la comparación es directa.
 
 El gráfico de MAE usa escala logarítmica porque el rango de errores cubre tres órdenes de
 magnitud entre el mejor caso (XGBoost en Norne, 19.8 psi) y el peor (Ridge en Volve, más de
-8000 psi). En el gráfico de R², el valor del baseline en Volve ($-891.83$) está clipeado
-para no aplastar al resto de la escala; los demás valores se ven con claridad.
+8000 psi). En el gráfico de R², el valor del baseline en Volve ($-891.83$) está truncado
+para no ofuscar al resto de la escala.
 
 \begin{figure}[H]
 \centering
@@ -968,8 +970,7 @@ para no aplastar al resto de la escala; los demás valores se ven con claridad.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{img/validacion/comparacion_r2.png}
-\caption{Comparación del R² entre los cuatro modelos. El valor del baseline Ridge en Volve
-($-891.83$) está clipeado para no comprimir la escala del resto de las barras.}
+\caption{Comparación del R² entre los cuatro modelos.}
 \label{fig:comparacion-r2}
 \end{figure}
 
@@ -978,9 +979,6 @@ individuales de cada modelo: el modelo LSTM es el único que logra transferir en
 reservorios. Los demás modelos alcanzan métricas muy buenas in-distribution sobre
 Norne pero colapsan al evaluar sobre Volve, mientras que el LSTM mantiene un R² positivo y
 un MAE varios órdenes de magnitud menor en el split cross-reservoir.
-
-Por estas razones nos quedamos con el LSTM como modelo final del trabajo.
-
 
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
