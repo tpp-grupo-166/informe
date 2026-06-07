@@ -590,6 +590,15 @@ entre las columnas originales del dataset:
     extracción y si se está logrando mantener la presión del reservorio.
   \end{itemize}
 
+Un problema con el que nos encontramos fue cómo incluir la tabla PVT como input del modelo, dado
+que es una tabla separada del dataset principal y con una estructura distinta a la de la información
+temporal, ya que tiene una fila por nivel de presión (con los valores de Bo, Bg y Rs medidos en
+laboratorio para ese nivel) y no cambia en el tiempo.
+Lo resolvimos agregando un \textbf{encoder de PVT}, un módulo pequeño que se entrena junto con el resto del modelo y cuya
+función es comprimir toda la tabla PVT a un vector resumen compacto. Ese vector se le pasa al
+modelo principal como un dato adicional por simulación, de manera que la información termodinámica
+del fluido influya en la predicción sin opacar a las variables que cambian con el tiempo.
+
 \subsubsection{Aplicación Web}
 
 El sistema está compuesto por una arquitectura cliente-servidor, donde el frontend permite la interacción con el usuario y 
