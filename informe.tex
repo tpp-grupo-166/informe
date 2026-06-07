@@ -697,26 +697,355 @@ de datos como visualización e interacción con el usuario.
 % ============================================================
 \section{Experimentación y/o validación}
 
+\section{Experimentación y/o validación}
 
-% Ejemplo de figura numerada con descripción:
-% \begin{figure}[H]
-% \centering
-% \includegraphics[width=0.7\textwidth]{imagen.png}
-% \caption{Breve descripción de la figura.}
-% \label{fig:ejemplo}
-% \end{figure}
+\subsection{Metodología experimental}
 
-% Ejemplo de tabla numerada con descripción:
-% \begin{table}[H]
-% \centering
-% \caption{Breve descripción de la tabla.}
-% \begin{tabular}{|c|c|}
-% \hline
-% Col1 & Col2 \\ \hline
-% Dato & Dato \\ \hline
-% \end{tabular}
-% \label{tab:ejemplo}
-% \end{table}
+El objetivo central del experimento es evaluar la capacidad del modelo de generalizar entre
+reservorios distintos. Para eso definimos dos tipos de evaluación que se aplican a todos los
+modelos del trabajo de forma idéntica:
+
+\begin{itemize}
+  \item \textbf{Evaluación in-distribution}: el modelo se entrena con 24 de las 30 simulaciones
+  de Norne y se evalúa sobre las 6 simulaciones restantes de Norne, que no vio durante el
+  entrenamiento. Mide qué tan bien el modelo aprende la dinámica del campo dentro de su
+  distribución de entrenamiento.
+
+  \item \textbf{Evaluación cross-reservoir}: el modelo se evalúa sobre las 10 simulaciones
+  completas de Volve, un reservorio al que nunca fue expuesto durante el entrenamiento. Es la
+  prueba central del trabajo, ya que mide si el modelo aprendió la física subyacente o si
+  solamente memorizó la distribución particular de Norne.
+\end{itemize}
+
+Las métricas que reportamos son R² (coeficiente de determinación, que mide qué fracción de la
+varianza del target explica el modelo) y MAE (mean absolute error, en psi, el error promedio
+absoluto en la misma unidad física que la presión del reservorio). Los plots de cada modelo
+siguen una convención común: trayectorias de presión por simulación (una grilla con un panel
+por sim, mostrando la presión real frente a la predicha en función del tiempo) y un parity
+plot global (scatter de presión real frente a predicha sobre todos los timesteps, con la
+diagonal $y = x$ de referencia).
+
+Todos los modelos comparten además el mismo conjunto de features adimensionales descripto en
+la sección anterior, de manera que la única diferencia entre experimentos es la familia de
+modelo elegida.
+
+\subsection{Modelo baseline}
+
+El primer modelo que probamos fue una regresión lineal con regularización Ridge sobre las
+features adimensionales del reservorio. La elección no buscaba alcanzar buena performance
+sino establecer una cota inferior empírica contra la cual comparar los modelos posteriores.
+El valor del coeficiente de regularización se eligió mediante búsqueda con GridSearchCV usando
+un esquema GroupKFold para que cada fold contenga simulaciones completas sin partir timesteps.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo baseline (regresión Ridge).}
+\label{tab:metricas-baseline}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.959 & 35.23 \\
+\hline
+Volve (cross-reservoir) & -891.83 & 8166.51 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/baseline_norne_trayectorias.png}
+\caption{Baseline Ridge, test in-distribution sobre Norne: trayectoria de presión por
+simulación, con la presión real en negro y la predicha en azul punteado.}
+\label{fig:baseline-norne-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/baseline_norne_parity.png}
+\caption{Baseline Ridge, test in-distribution sobre Norne: parity plot global.}
+\label{fig:baseline-norne-parity}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/baseline_volve_trayectorias.png}
+\caption{Baseline Ridge, evaluación cross-reservoir sobre Volve.}
+\label{fig:baseline-volve-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/baseline_volve_parity.png}
+\caption{Baseline Ridge, parity plot sobre Volve. Las predicciones quedan muy por fuera del
+rango real de presión.}
+\label{fig:baseline-volve-parity}
+\end{figure}
+
+El modelo obtiene un ajuste muy bueno sobre Norne (R² = 0.96), gracias a que las features
+adimensionales y la presión inicial del reservorio le permiten al modelo recuperar la
+trayectoria de presión con gran precisión dentro de su distribución de entrenamiento. Sin
+embargo, al aplicarlo a Volve el comportamiento es catastrófico: el R² cae a valores
+fuertemente negativos y el MAE supera los 8000 psi. El modelo no captura la física común a
+los dos reservorios sino una relación lineal específica de la distribución de Norne, y al
+extrapolar a un reservorio con rangos distintos de presión y geometría produce predicciones
+fuera de cualquier valor físico razonable.
+
+\subsection{Modelos clásicos de regresión}
+
+A partir del baseline probamos dos modelos más expresivos, ambos basados en árboles de
+decisión. El protocolo de entrenamiento y evaluación es idéntico al del baseline: train sobre
+24 simulaciones de Norne, test in-distribution sobre las 6 restantes, evaluación
+cross-reservoir sobre las 10 simulaciones de Volve. La búsqueda de hiperparámetros se hace con
+GridSearchCV usando un esquema GroupKFold de 5 folds.
+
+\subsubsection{Random Forest}
+
+El primer modelo no lineal que probamos fue Random Forest, un ensamble de árboles de decisión
+entrenados con muestreo bootstrap. La motivación fue capturar interacciones no lineales entre
+las features que la regresión lineal no podía representar.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo Random Forest.}
+\label{tab:metricas-rf}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.977 & 22.99 \\
+\hline
+Volve (cross-reservoir) & -9.03 & 842.43 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/random_forest_norne_trayectorias.png}
+\caption{Random Forest, test in-distribution sobre Norne: trayectoria de presión por
+simulación.}
+\label{fig:rf-norne-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/random_forest_norne_parity.png}
+\caption{Random Forest, test in-distribution sobre Norne: parity plot global.}
+\label{fig:rf-norne-parity}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/random_forest_volve_trayectorias.png}
+\caption{Random Forest, evaluación cross-reservoir sobre Volve.}
+\label{fig:rf-volve-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/random_forest_volve_parity.png}
+\caption{Random Forest, parity plot sobre Volve.}
+\label{fig:rf-volve-parity}
+\end{figure}
+
+Random Forest mejora todavía más al baseline sobre Norne: el R² sube de 0.96 a 0.98 y el MAE
+baja de 35 a 23 psi. En Volve, sin embargo, el modelo vuelve a fallar de manera consistente.
+El R² es de -9.03 y el MAE supera los 800 psi. Aunque las predicciones ya no son tan extremas
+como las del baseline lineal, la incapacidad de generalizar fuera de la distribución de
+entrenamiento se mantiene.
+
+\subsubsection{XGBoost}
+
+XGBoost es un ensamble de árboles entrenado por gradient boosting, que en general supera a
+Random Forest en problemas tabulares.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo XGBoost.}
+\label{tab:metricas-xgboost}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.986 & 19.80 \\
+\hline
+Volve (cross-reservoir) & -9.93 & 864.89 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/xgboost_norne_trayectorias.png}
+\caption{XGBoost, test in-distribution sobre Norne: trayectoria de presión por simulación.}
+\label{fig:xgb-norne-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/xgboost_norne_parity.png}
+\caption{XGBoost, test in-distribution sobre Norne: parity plot global.}
+\label{fig:xgb-norne-parity}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/xgboost_volve_trayectorias.png}
+\caption{XGBoost, evaluación cross-reservoir sobre Volve.}
+\label{fig:xgb-volve-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/xgboost_volve_parity.png}
+\caption{XGBoost, parity plot sobre Volve.}
+\label{fig:xgb-volve-parity}
+\end{figure}
+
+XGBoost obtiene la mejor performance in-distribution sobre Norne de los modelos probados:
+R² = 0.986 y MAE de apenas 19.80 psi, valores muy superiores al baseline. Sin embargo,
+mantiene la misma incapacidad de generalizar entre reservorios: el R² sobre Volve es de
+-9.93 y el MAE de 865 psi.
+
+\subsubsection{Análisis de los modelos clásicos}
+
+Los tres modelos clásicos comparten un patrón consistente y bastante revelador. Cada uno
+mejora a su antecesor en métricas in-distribution sobre Norne (el baseline alcanza R² = 0.96,
+Random Forest sube a 0.98 y XGBoost a 0.99), lo cual indicaría buen ajuste si el problema
+fuera predecir la presión dentro del mismo reservorio. Pero el rendimiento cross-reservoir
+sobre Volve no mejora con la complejidad: el R² es negativo para los tres modelos.
+
+La explicación de este comportamiento se encuentra en la naturaleza no secuencial de estos
+modelos. Tratan cada timestep como una muestra independiente y aprenden el mapeo entre
+features operativas y presión que mejor se ajusta a la distribución particular de Norne.
+Cuanto más flexible es el modelo, más fielmente memoriza esa distribución específica, y menos
+generaliza a un reservorio con escalas, geometría y propiedades de fluido distintas. Esta
+limitación motivó la transición a modelos que puedan aprovechar la dependencia temporal del
+problema y que puedan incorporar explícitamente la información termodinámica del fluido como
+contexto adicional.
+
+\subsection{Modelos recurrentes (LSTM)}
+
+El siguiente paso fue una arquitectura recurrente. Como se discutió en la sección anterior,
+el modelo final es una LSTM extendida con un encoder de PVT que le permite condicionar las
+predicciones a las propiedades termodinámicas del fluido.
+
+\subsubsection{LSTM con encoder de PVT}
+
+El entrenamiento se realizó sobre 24 de las 30 simulaciones de Norne, dejando 6 simulaciones
+como test in-distribution. La evaluación cross-reservoir se hizo sobre las 10 simulaciones
+completas de Volve, con sus tablas PVT canónicas del laboratorio.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo LSTM con encoder de PVT.}
+\label{tab:metricas-lstm}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.910 & 51.70 \\
+\hline
+Volve (cross-reservoir) & 0.735 & 101.90 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/lstm_norne_trayectorias.png}
+\caption{LSTM con encoder de PVT, test in-distribution sobre Norne: trayectoria de presión
+por simulación.}
+\label{fig:lstm-norne-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/lstm_norne_parity.png}
+\caption{LSTM con encoder de PVT, test in-distribution sobre Norne: parity plot global.}
+\label{fig:lstm-norne-parity}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{img/lstm_volve_trayectorias.png}
+\caption{LSTM con encoder de PVT, evaluación cross-reservoir sobre Volve: trayectoria de
+presión por simulación. Ninguna de las simulaciones fue vista durante el entrenamiento.}
+\label{fig:lstm-volve-traj}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.6\textwidth]{img/lstm_volve_parity.png}
+\caption{LSTM con encoder de PVT, parity plot sobre Volve. La nube de puntos se mantiene
+cercana a la diagonal a pesar de que el modelo nunca vio el reservorio durante el
+entrenamiento.}
+\label{fig:lstm-volve-parity}
+\end{figure}
+
+Los resultados muestran un comportamiento cualitativamente distinto al de los modelos
+clásicos. En Norne, el modelo alcanza un R² de 0.91 en el test in-distribution, un valor
+algo más bajo que XGBoost en su propio reservorio (0.99). La diferencia clave está en Volve:
+el R² cross-reservoir del LSTM es de 0.735 con un MAE de 101.9 psi, mientras que los modelos
+clásicos no superaban valores negativos. La LSTM genera predicciones que mantienen la forma
+general de la trayectoria de presión de cada simulación de Volve, en contraste con los
+modelos clásicos que predicen valores muy fuera del rango físico real.
+
+El intercambio es interesante de observar: el LSTM sacrifica algo de precisión in-distribution
+respecto de los modelos clásicos a cambio de una capacidad de generalización cualitativamente
+superior. Esto refleja el efecto de no usar la presión inicial como feature directa sino como
+referencia de normalización del target.
+
+\subsection{Comparación final entre modelos}
+
+La Tabla \ref{tab:comparacion-final} resume las métricas de cada uno de los cuatro modelos
+sobre sus respectivos splits in-distribution y cross-reservoir. Dado que todos los modelos
+fueron entrenados con el mismo protocolo (24 simulaciones de Norne como train, 6 como test,
+las 10 simulaciones de Volve como evaluación cross-reservoir), la comparación es directa.
+
+\begin{table}[ht]
+\centering
+\caption{Comparación de métricas entre todos los modelos probados.}
+\label{tab:comparacion-final}
+\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Modelo} & \multicolumn{2}{c|}{\textbf{Norne (in-distribution)}} &
+\multicolumn{2}{c|}{\textbf{Volve (cross-reservoir)}} \\
+\cline{2-5}
+ & R² & MAE (psi) & R² & MAE (psi) \\
+\hline
+Regresión Ridge (baseline) & 0.959 & 35.23 & -891.83 & 8166.51 \\
+\hline
+Random Forest & 0.977 & 22.99 & -9.03 & 842.43 \\
+\hline
+XGBoost & 0.986 & 19.80 & -9.93 & 864.89 \\
+\hline
+LSTM con encoder de PVT & 0.910 & 51.70 & 0.735 & 101.90 \\
+\hline
+\end{tabular}
+\end{table}
+
+La conclusión principal del experimento es que los tres modelos clásicos no logran transferir
+entre reservorios. Cada uno alcanza valores in-distribution sobre Norne muy buenos, pero
+todos colapsan al evaluar sobre Volve: R² negativos para los tres y MAE entre 800 y 8000 psi.
+El modelo más sofisticado del grupo (XGBoost) no es la excepción, lo cual sugiere que la
+mera adición de capacidad expresiva al modelo, sin mecanismos para representar la naturaleza
+temporal del problema y las propiedades del fluido, no es suficiente para que el modelo
+aprenda la física subyacente del reservorio.
+
+El LSTM con encoder de PVT muestra el comportamiento opuesto. Su R² in-distribution sobre
+Norne (0.910) es algo más bajo que el de XGBoost, pero su R² cross-reservoir sobre Volve
+(0.735) está muy por encima de cualquiera de los modelos clásicos. La diferencia estructural
+que explica este comportamiento es doble: por un lado, el LSTM procesa la serie temporal como
+una secuencia, lo que le permite incorporar la historia de extracción e inyección en la
+predicción de cada timestep. Por el otro, el encoder de PVT le da al modelo acceso a las
+propiedades termodinámicas del fluido del reservorio sobre el que está prediciendo, lo cual
+le permite ajustar su respuesta a un fluido distinto del que vio durante el entrenamiento.
+
+Por estas razones nos quedamos con el LSTM con encoder de PVT como modelo final del trabajo.
+
 
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
