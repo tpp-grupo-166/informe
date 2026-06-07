@@ -86,8 +86,11 @@
   \centering
   \thispagestyle{empty}
 
-  {\fontsize{14}{17}\selectfont Universidad de Buenos Aires\par}
-  {\fontsize{14}{17}\selectfont Facultad de Ingeniería\par}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/logo_fiuba.png}
+  \end{figure}
+
   \vspace{3cm}
 
   {\fontsize{16}{19}\bfseries Data Analytics para la estimación\\
@@ -96,22 +99,26 @@
   \vspace{1.5cm}
 
   {\fontsize{12}{15}\selectfont
-  \textbf{Tutor:} Dr. Hernán Merlino\\[0.3cm]
-  \textbf{Co-tutor:} Dra. Gabriela Savioli\par}
+  \textbf{Director:} Dr. Hernán Merlino (hmerlino@fi.uba.ar )\\[0.3cm]
+  \textbf{Co-directora:} Dra. Gabriela Savioli (gsavioli@fi.uba.ar) \par}
 
   \vspace{2.5cm}
 
   {\fontsize{14}{17}\bfseries Integrantes\par}
   \vspace{0.5cm}
-
-  {\fontsize{11}{16.5}\selectfont
-  \renewcommand{\arraystretch}{1.4}
-  \begin{tabular}{lcl}
-  Alan Valdevenito   & 107585 & avaldevenito@fi.uba.ar \\
-  Franco Bragantini  & 97190  & fbragantini@fi.uba.ar  \\
-  Mateo Rico         & 108127 & mrico@fi.uba.ar        \\
-  Máximo Palopoli    & 108755 & mpalopoli@fi.uba.ar    \\
-  \end{tabular}\par}
+  \begin{tabular}{|l|l|c|}
+    \hline
+    \textbf{Nombre} & \textbf{Email} & \textbf{Padrón} \\
+    \hline
+    Alan Valdevenito   & avaldevenito@fi.uba.ar & 107585 \\
+    \hline
+    Franco Bragantini  & fbragantini@fi.uba.ar  & 97190  \\
+    \hline
+    Mateo Rico         & mrico@fi.uba.ar        & 108127 \\
+    \hline
+    Máximo Palopoli    & mpalopoli@fi.uba.ar    & 108755 \\
+    \hline
+  \end{tabular}
 
   \vfill
 
@@ -139,20 +146,22 @@
 
 
 \bigskip
-Por la presente, dejo constancia de que el trabajo final titulado
-\textit{``\tituloTrabajo''}, realizado por los integrantes Bragantini,
-Palopoli, Rico y Valdevenito, ha sido desarrollado bajo mi dirección y
-cuenta con mi aval para su presentación y defensa.
+En Buenos Aires a [día] de [mes] del año [año] se reúnen Dr. Hernán Merlino 
+con los estudiantes de la carrera de Ingeniería en Informática: Franco Julián Bragantini,
+Máximo Palopoli, Mateo Julián Rico y Alan Valdevenito.
+El objetivo de la reunión es revisar el Informe Final del Trabajo Profesional de Ingeniería en Informática.
+
+Luego de haber leído el informe del Trabajo Profesional \textbf{Data Analytics para la estimación de la presión de yacimientos de petróleo},
+el Director del mismo, Dr. Hernán Merlino, declara que el mismo se corresponde con el trabajo realizado a lo largo del
+proyecto y avala el documento presentado como Informe Final, tanto en su completitud como en la claridad de redacción.
+
+\vspace{1.5cm}
+
+Firma y aclaración del director: [firma y aclaración]
 
 \vspace{3cm}
-\noindent
-\hfill
-\begin{minipage}{6cm}
-  \centering
-  \rule{6cm}{0.4pt}\\
-  Firma del Director\\
-  Nombre del Director
-\end{minipage}
+
+Firmas y aclaraciones de los estudiantes: [firmas y aclaraciones]
 
 % ============================================================
 % 3. RESUMEN
@@ -259,11 +268,11 @@ En este contexto, la correcta estimación de la presión es la piedra angular de
 yacimientos moderna, influyendo en cada decisión, desde la perforación del primer pozo exploratorio hasta
 el abandono final del campo.
 
-Proponemos implementar un modelo predictivo que combine la física del reservorio con técnicas de data
-analytics, para poder estimar la presión de los yacimientos de hidrocarburos.
+En este documento presentamos un MVP de un sistema para estimar la presión de reservorios mediante
+un modelo predictivo de machine learning.
 
-En las siguientes secciones se describe en mayor detalle el problema a resolver, la solución propuesta, el
-impacto del proyecto en la industria, la planificación del desarrollo, la metodología a seguir y los
+En las siguientes secciones se describe en mayor detalle el problema a resolver, la solución implementada,
+la metodología utilizada, el impacto del proyecto en la industria, la planificación del desarrollo y los
 mecanismos de validación del sistema.
 
 % ============================================================
@@ -292,10 +301,7 @@ de yacimientos durante décadas.
 
 En la actualidad, la industria vive una transición hacia el paradigma basado en datos~\cite{ref5},
 impulsada por el crecimiento del volumen de datos proveniente de fuentes como adquisición sísmica,
-registros de perforación, sensores permanentes de pozos y laboratorios. El desafío ya no es la adquisición
-de datos, sino su integración, normalización e interpretación efectiva. La información a menudo reside en
-silos, en formatos dispares y con calidades variables, lo que dificulta la creación de una visión
-unificada y coherente del yacimiento.
+registros de perforación, sensores permanentes de pozos y laboratorios.
 
 En este contexto, los métodos de data analytics y machine learning se posicionan como herramientas capaces
 de aprender directamente de los datos históricos. Estos modelos permiten:
@@ -327,8 +333,7 @@ Entre los algoritmos más destacados se encuentran:
 El avance más reciente es la integración de datos y física en enfoques híbridos. Los proxies de ML permiten
 generar predicciones en milisegundos tras ser entrenados con simulaciones numéricas, y las Redes
 Neuronales Informadas por la Física (PINNs)~\cite{ref6} incorporan ecuaciones diferenciales en su
-entrenamiento, garantizando consistencia física aun en ausencia de datos. Esto transforma el machine
-learning desde una ``caja negra'' hacia una verdadera herramienta de computación científica.
+entrenamiento, garantizando consistencia física aun en ausencia de datos.
 
 % ============================================================
 % 10. PROBLEMA DETECTADO Y/O FALTANTE
@@ -354,8 +359,8 @@ significativas para manejar la escala y complejidad de los datos modernos:
   subjetivos~\cite{ref4}.
 \end{itemize}
 
-En consecuencia, existe una brecha entre las necesidades actuales ---predicciones rápidas, robustas y
-capaces de integrar múltiples fuentes de datos--- y las capacidades de las metodologías tradicionales.
+En consecuencia, existe una brecha entre las necesidades actuales (predicciones rápidas, robustas y
+capaces de integrar múltiples fuentes de datos) y las capacidades de las metodologías tradicionales.
 
 Esta brecha justifica la \textbf{exploración de nuevos enfoques} basados en Machine Learning, que permitan
 aprovechar datos históricos para generar estimaciones de presión más ágiles, transparentes y escalables.
@@ -367,7 +372,7 @@ aprovechar datos históricos para generar estimaciones de presión más ágiles,
 \newpage
 \section{Solución implementada}
 
-La solución implementada es una aplicación web que realizar estimaciones de la presión de un reservorio mediante un modelo
+La solución implementada es una aplicación web que permite realizar estimaciones de la presión de un reservorio mediante un modelo
 de machine learning. El sistema toma como entrada un conjunto de datos cargados por el usuario y, a partir
 de ellos, genera una predicción de la presión del reservorio.
 
@@ -436,7 +441,7 @@ elección del LSTM como modelo final.
 
 \paragraph{Esquema de datos}
 
-El esquema de columnas del dataset fue propuesto por nuestros tutores con un objetivo concreto: que el modelo tenga 
+El esquema de columnas del dataset fue propuesto por nuestros directores con un objetivo concreto: que el modelo tenga 
 a disposición toda la información que aparece en la \textbf{ecuación de balance de masa}, que es la 
 ecuación física que gobierna la evolución de la presión del reservorio. La MBE relaciona la producción acumulada 
 de fluidos, la inyección acumulada, las propiedades termodinámicas del fluido y la geometría del reservorio con el 
@@ -605,7 +610,7 @@ escala fija de 5000 psi. El resultado es un target chico y cercano a cero, más 
 entrenar la red neuronal y que elimina la dependencia con el punto de partida particular de cada
 corrida.
 
-Además de aplicar normalizaciones, también creamos nuevas features (sugeridas por nuestros tutores) a partir de relaciones 
+Además de aplicar normalizaciones, también creamos nuevas features (sugeridas por nuestros directores) a partir de relaciones 
 entre las columnas originales del dataset:
 
 \begin{itemize}
@@ -1097,7 +1102,30 @@ Texto.
 \newpage
 \section{Riesgos materializados y Lecciones aprendidas}
 
-Texto.
+A lo largo del desarrollo del proyecto se identificaron y, en algunos casos, se materializaron 
+diversos riesgos que impactaron en la planificación y ejecución del trabajo.
+
+Uno de los principales riesgos fue la dependencia de datos provenientes de la industria y la 
+escasez de datos reales de presión. Este riesgo se materializó durante el primer cuatrimestre,
+lo que llevó a la necesidad de trabajar inicialmente con datos sintéticos.
+
+Durante el segundo cuatrimestre, se intentó generar estos datos mediante distintas herramientas,
+pero la falta de confianza en su realismo motivó la adopción de un enfoque alternativo basado en 
+simulaciones físicas utilizando OPM Flow, lo que permitió obtener datasets más representativos.
+
+En cuanto a las lecciones aprendidas, se destaca en primer lugar la importancia de comprender 
+profundamente el dominio del problema antes de abordar el modelado. El estudio realizado en la 
+primera etapa resultó fundamental para identificar las variables relevantes y orientar 
+correctamente el análisis de datos y la construcción de modelos.
+
+Asimismo, se evidenció que la planificación de proyectos en contextos reales debe contemplar la 
+incertidumbre asociada al acceso y calidad de los datos. La necesidad de adaptar la estrategia de 
+generación y selección de datos puso de manifiesto la importancia de mantener un enfoque flexible
+e iterativo.
+
+Finalmente, se aprendió que la validación continua con expertos en el dominio es clave para 
+garantizar la calidad y relevancia de los resultados, especialmente en problemas interdisciplinarios
+donde el conocimiento técnico por sí solo no es suficiente.
 
 % ============================================================
 % 17. IMPACTOS SOCIALES Y AMBIENTALES DEL PROYECTO
