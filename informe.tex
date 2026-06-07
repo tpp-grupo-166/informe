@@ -421,9 +421,13 @@ El objetivo del modelo es predecir, a lo largo del tiempo, la presión promedio 
 y de las propiedades del fluido.
 
 Para este proyecto utilizamos un modelo de tipo LSTM (Long Short-Term Memory).
-Para la elección del mismo, se realizaron múltiples pruebas con distintos modelos: 
-regresión lineal, random forests, XGBoost y series de tiempo. 
+Para la elección del mismo, se realizaron múltiples pruebas con distintos modelos:
+regresión lineal, random forests, XGBoost y series de tiempo.
 Sin embargo, nos decantamos por LSTM ya que resultó ser el más efectivo de todos.
+
+En la sección \ref{sec:experimentacion} se detalla el procedimiento de entrenamiento y
+validación de cada modelo evaluado, junto con la comparación de resultados que motivó la
+elección del LSTM como modelo final.
 
 \paragraph{Esquema de datos}
 
@@ -698,6 +702,7 @@ de datos como visualización e interacción con el usuario.
 % 14. EXPERIMENTACIÓN Y/O VALIDACIÓN
 % ============================================================
 \section{Experimentación y/o validación}
+\label{sec:experimentacion}
 
 Durante el entrenamiento de los modelos se realizaron múltiples pruebas para validar la efectividad de los mismos,
 compararlos, y decidir cuál utilizar en el proyecto:
