@@ -12,6 +12,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{hyperref}
+\usepackage{float}
 
 % ====== INTERLINEADO 1,5 ======
 \onehalfspacing
@@ -69,6 +70,10 @@
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
+
+\titleformat{\paragraph}[block]
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{0.5em}
 
 \begin{document}
 
@@ -374,7 +379,7 @@ predicho sino también el grado de confianza del modelo.
 
 El sistema está compuesto una aplicación web (frontend y backend) y un modelo de machine learning.
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{img/arquitectura.png}
   \caption{Diagrama de arquitectura del sistema}
@@ -382,8 +387,6 @@ El sistema está compuesto una aplicación web (frontend y backend) y un modelo 
 \end{figure}
 
 En las siguientes secciones se detalla cada componente en profundidad.
-
-\subsubsection{Modelo de Machine Learning}
 
 \subsubsection{Aplicación Web}
 
@@ -411,6 +414,223 @@ también se brinda contexto para su análisis y comprensión.
 
 Además, la aplicación está diseñada con una arquitectura modular que separa claramente las responsabilidades en capas 
 (dominio, infraestructura, repositorios, rutas), facilitando la mantenibilidad y escalabilidad del sistema.
+
+\subsubsection{Modelo de Machine Learning}
+
+El objetivo del modelo es predecir, a lo largo del tiempo, la presión promedio del reservorio a partir de datos operativos
+y de las propiedades del fluido.
+
+Para este proyecto utilizamos un modelo de tipo LSTM (Long Short-Term Memory).
+Para la elección del mismo, se realizaron múltiples pruebas con distintos modelos:
+regresión lineal, random forests, XGBoost y series de tiempo.
+Sin embargo, nos decantamos por LSTM ya que resultó ser el más efectivo de todos.
+
+En la sección \ref{sec:experimentacion} se detalla el procedimiento de entrenamiento y
+validación de cada modelo evaluado, junto con la comparación de resultados que motivó la
+elección del LSTM como modelo final.
+
+\paragraph{Esquema de datos}
+
+El esquema de columnas del dataset fue propuesto por nuestros tutores con un objetivo concreto: que el modelo tenga 
+a disposición toda la información que aparece en la \textbf{ecuación de balance de masa}, que es la 
+ecuación física que gobierna la evolución de la presión del reservorio. La MBE relaciona la producción acumulada 
+de fluidos, la inyección acumulada, las propiedades termodinámicas del fluido y la geometría del reservorio con el 
+cambio de presión observado en el tiempo. 
+
+El dataset consta de dos tablas, cada tabla representa los datos de un reservorio en particular.
+
+La primera (Tabla~\ref{tab:dataset-produccion}) tiene una fila por timestep e integra la petrofísica
+y la geometría del reservorio junto con los caudales de producción e inyección.
+
+La segunda (Tabla~\ref{tab:dataset-pvt}) describe las propiedades termodinámicas 
+del fluido medidas en laboratorio, tabuladas en función de la presión.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{|l|c|c|l|p{4.5cm}|}
+  \hline
+  \textbf{Nombre} & \textbf{Símbolo} & \textbf{Unidad} & \textbf{Tipo} & \textbf{Descripción} \\
+  \hline
+  \texttt{tiempo\_dias} & -- & -- & -- & Tiempo en días desde el comienzo de la producción. \\
+  \hline
+  \texttt{Porosidad} & $\phi$ & fracción & Estática (Petrofísica) & Fracción de espacio vacío en la matriz rocosa. \\
+  \hline
+  \texttt{Permeabilidad\_mD} & $k$ & mD & Estática (Petrofísica) & Capacidad de la roca para permitir el flujo de fluidos. \\
+  \hline
+  \texttt{Espesor\_Neto\_m} & $h$ & m & Estática (Geometría) & Espesor productivo neto de la formación. \\
+  \hline
+  \texttt{Area} & $A$ & m$^2$ & Estática (Geometría) & Área total de roca; multiplicada por $h$ se obtiene el volumen total de roca. \\
+  \hline
+  \texttt{Presion\_Inicial\_Reservorio\_psi} & $P_{init}$ & psi & Estática (Condición inicial) & Presión promedio del reservorio antes de comenzar la producción. \\
+  \hline
+  \texttt{Caudal\_Prod\_Petroleo\_bbl} & $q_o$ & bbl/d & Dinámica (Operativa) & Volumen diario de petróleo extraído en superficie. \\
+  \hline
+  \texttt{Caudal\_Prod\_Gas\_Mpc} & $Q_g$ & Mpc/d & Dinámica (Operativa) & Volumen diario de gas producido. \\
+  \hline
+  \texttt{Caudal\_Iny\_Agua\_bbl} & $q_{winj}$ & bbl/d & Dinámica (Operativa) & Volumen diario de agua inyectada al reservorio. \\
+  \hline
+  \texttt{Prod\_Acumulada\_Petroleo} & $N_p$ & bbl & Dinámica (Histórica) & Sumatoria histórica del volumen de petróleo extraído. \\
+  \hline
+  \texttt{Prod\_Acumulada\_Gas} & $G_p$ & scf & Dinámica (Histórica) & Sumatoria histórica del volumen de gas extraído. \\
+  \hline
+  \texttt{Prod\_Acumulada\_Agua} & $W_p$ & bbl & Dinámica (Histórica) & Sumatoria histórica del volumen de agua extraída. \\
+  \hline
+  \texttt{Iny\_Acumulada\_Agua} & $W_{inj}$ & bbl & Dinámica (Histórica) & Sumatoria histórica del volumen de agua inyectada. \\
+  \hline
+\end{tabular}
+\caption{Esquema de la tabla de producción e inyección.}
+\label{tab:dataset-produccion}
+\end{table}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{|l|c|c|l|p{4.5cm}|}
+  \hline
+  \textbf{Nombre} & \textbf{Símbolo} & \textbf{Unidad} & \textbf{Tipo} & \textbf{Descripción} \\
+  \hline
+  \texttt{p\_grid\_psi} & $P$ & psi & Termodinámica (PVT) & Presión a la cual se miden las propiedades termodinámicas. \\
+  \hline
+  \texttt{Bo\_rb\_stb} & $B_o$ & rb/stb & Termodinámica (PVT) & Factor volumétrico del petróleo (relación fondo-superficie). \\
+  \hline
+  \texttt{Bg\_rb\_scf} & $B_g$ & rb/scf & Termodinámica (PVT) & Factor volumétrico del gas (relación fondo-superficie). \\
+  \hline
+  \texttt{Rs\_scf\_stb} & $R_s$ & scf/stb & Termodinámica (PVT) & Relación de gas disuelto por barril de petróleo. \\
+  \hline
+\end{tabular}
+\caption{Esquema de la tabla PVT.}
+\label{tab:dataset-pvt}
+\end{table}
+
+El \textbf{target} del modelo es la presión promedio del reservorio en cada timestep ($P_r$), una columna adicional
+del primer dataset que no se usa como input sino como variable a predecir. 
+
+\paragraph{Generación de datos sintéticos}
+
+Para entrenar el modelo LSTM utilizamos datos sintéticos. La razón principal es que conseguir datos
+reales con el esquema que necesitamos (presión del reservorio en función de variables operativas 
+y propiedades del fluido, a lo largo del tiempo) es difícil sin una colaboración directa con una empresa petrolera,
+ya que se trata de información sensible que las operadoras manejan bajo confidencialidad.
+
+Para generar los datos sintéticos utilizamos el simulador OPM Flow, junto con una herramienta que desarrollamos
+en Python para poder extraer los datos que necesitamos.
+El simulador OPM Flow toma como input un modelo de reservorio definido en el formato ECLIPSE, que contiene toda la descripción física del
+campo: la geometría del reservorio, las propiedades de la roca, la tabla PVT del fluido, la
+configuración de los pozos y el cronograma operativo de producción e inyección. A partir de esa
+entrada, OPM Flow simula el proceso productivo paso a paso en el tiempo y genera archivos
+con el historial completo del estado del reservorio, capturando variables como la presión,
+los caudales de producción e inyección, las saturaciones de cada fase y demás propiedades por celda.
+
+En concreto, utilizamos dos modelos de reservorios que representan campos reales del Mar del Norte y del
+Mar de Noruega: \textbf{Norne} y \textbf{Volve}. 
+Decidimos utilizar estos modelos ya que se trata de yacimientos genuinos que estuvieron en producción durante años,
+operados originalmente por la petrolera noruega Equinor. Además, son dos de los benchmarks más populares en la 
+industria y la academia. La mayoría de los otros modelos públicos disponibles son reservorios teóricos
+inventados con fines académicos, sin correspondencia con un campo concreto.
+
+Para otorgarle variabilidad al dataset, ejecutamos distintas simulaciones (30 simulaciones del modelo Norne,
+y 10 simulaciones del modelo Volve), variando ciertos parámetros del reservorio en cada
+una, de manera de obtener corridas con comportamientos distintos. Las variables que ajustamos
+fueron la porosidad de la roca, su permeabilidad, la presión inicial del reservorio y 
+el esquema de inyección de agua. 
+Esto nos permitió obtener un dataset con suficiente diversidad de comportamientos, de modo que el modelo aprenda patrones
+generalizables en lugar de memorizar una única trayectoria de presión.
+
+A continuación se incluyen visualizaciones de los datasets generados, mostrando variables
+como la presión, caudales de inyección y producción, en función del tiempo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/caudal_inyeccion_agua_norne.png}
+  \caption{Caudal de inyección de agua (simulaciones Norne)}
+  \label{fig:caudal_iny_norne}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/caudal_inyeccion_agua_volve.png}
+  \caption{Caudal de inyección de agua (simulaciones Volve)}
+  \label{fig:caudal_iny_volve}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/produccion_acumulada_petroleo_agua_norne.png}
+  \caption{Producción acumulada de petróleo y agua (simulaciones Norne)}
+  \label{fig:prod_acumulada_norne}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/produccion_acumulada_petroleo_agua_volve.png}
+  \caption{Producción acumulada de petróleo y agua (simulaciones Volve)}
+  \label{fig:prod_acumulada_volve}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/trayectorias_presion_norne.png}
+  \caption{Presión en función del tiempo (simulaciones Norne)}
+  \label{fig:presion_norne}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{img/trayectorias_presion_volve.png}
+  \caption{Presión en función del tiempo (simulaciones Volve)}
+  \label{fig:presion_volve}
+\end{figure}
+
+\paragraph{Normalización de datos y Feature Engineering}
+
+A partir del análisis exploratorio del dataset, encontramos que los reservorios de Volve y Norne
+operan en rangos muy distintos de presión, caudales de producción y volúmenes acumulados, lo cual
+era esperable dado que se trata de campos de tamaños muy diferentes (Norne es aproximadamente 6 veces
+mas grande que Volve). Esto nos llevó a aplicar varias normalizaciones a los datos antes de pasarlos al modelo.
+
+La primera fue dividir las cantidades dependientes del tamaño del campo (producciones acumuladas,
+caudales de producción e inyección) por el pore-volume del reservorio, que es el volumen total que
+podría llenarse con fluido. De esta forma el modelo ve fracciones del volumen recuperado en lugar
+de barriles absolutos, y Norne y Volve se vuelven comparables a pesar de las diferencias de escala.
+
+La segunda fue normalizar la presión, es decir, en lugar de predecir el valor absoluto de la presión
+(que está en el orden de 3000 - 5000 psi), predecimos la diferencia respecto de la presión inicial del reservorio, dividida por una
+escala fija de 5000 psi. El resultado es un target chico y cercano a cero, más estable para
+entrenar la red neuronal y que elimina la dependencia con el punto de partida particular de cada
+corrida.
+
+Además de aplicar normalizaciones, también creamos nuevas features (sugeridas por nuestros tutores) a partir de relaciones 
+entre las columnas originales del dataset:
+
+\begin{itemize}
+    \item \textbf{Fracciones de fluido recuperado e inyectado}: producciones acumuladas
+    de petróleo y agua e inyección acumulada de agua, divididas por el pore-volume del reservorio.
+    Indican qué proporción del volumen total disponible ya fue extraída o repuesta mediante inyección.
+
+    \item \textbf{Relación gas-petróleo acumulada}: cuánto gas se produjo por
+    cada barril de petróleo hasta el momento.
+
+    \item \textbf{Relación agua-petróleo instantánea}: cuántos barriles de agua
+    se producen por cada barril de petróleo en ese instante. Es un indicador clásico del avance del
+    frente de agua hacia los pozos productores.
+
+    \item \textbf{Water cut acumulado}: porcentaje del total de líquidos
+    producidos que es agua.
+
+    \item \textbf{Voidage replacement ratio simplificado}: relación entre el
+    volumen total inyectado y el volumen total producido. Indica si la inyección de agua compensa la
+    extracción y si se está logrando mantener la presión del reservorio.
+  \end{itemize}
+
+Un problema con el que nos encontramos fue cómo incluir la tabla PVT como input del modelo, dado
+que es una tabla separada del dataset principal y con una estructura distinta a la de la información
+temporal, ya que tiene una fila por nivel de presión (con los valores de Bo, Bg y Rs medidos en
+laboratorio para ese nivel) y no cambia en el tiempo.
+Lo resolvimos agregando un \textbf{encoder de PVT}, un módulo pequeño que se entrena junto con el resto del modelo y cuya
+función es comprimir toda la tabla PVT a un vector resumen compacto. Ese vector se le pasa al
+modelo principal como un dato adicional por simulación, de manera que la información termodinámica
+del fluido influya en la predicción sin opacar a las variables que cambian con el tiempo.
 
 % ============================================================
 % 12. METODOLOGÍA APLICADA
@@ -482,27 +702,290 @@ de datos como visualización e interacción con el usuario.
 % 14. EXPERIMENTACIÓN Y/O VALIDACIÓN
 % ============================================================
 \section{Experimentación y/o validación}
+\label{sec:experimentacion}
+
+Durante el entrenamiento de los modelos se realizaron múltiples pruebas para validar la efectividad de los mismos,
+compararlos, y decidir cuál utilizar en el proyecto:
+
+Dado que contamos con dos modelos de reservorio (Norne y Volve), esto nos permitió validar
+que el modelo es capaz de generalizar entre reservorios distintos. En este contexto, realizamos
+dos tipos de pruebas:
+
+\begin{itemize}
+  \item \textbf{Evaluación in-distribution}: el modelo se entrena con 24 de las 30 simulaciones
+  de Norne y se evalúa sobre las 6 simulaciones restantes de Norne. Esto nos permite medir qué
+  tan bien el modelo predice la presión del campo con el que fue entrenado.
+
+  \item \textbf{Evaluación cross-reservoir}: el modelo se evalúa sobre las 10 simulaciones
+  completas de Volve, un reservorio al que nunca fue expuesto durante el entrenamiento. Esto nos
+  permite saber si el modelo aprendió la física subyacente o si solamente memorizó la distribución particular de Norne.
+\end{itemize}
+
+Para definir la calidad de los modelos, nos basamos en las siguientes métricas:
+\begin{itemize}
+  \item \textbf{R² (coeficiente de determinación)}: mide qué fracción de la varianza del target explica el modelo.
+  \item \textbf{MAE (Mean Absolute Error)}: el error promedio absoluto en la misma unidad física que la presión del reservorio (psi).
+\end{itemize}
+
+\subsection{Evaluación y análisis comparativo de los modelos de machine learning}
+
+A continuación se presenta un análisis comparativo de todos los modelos que se probaron durante la fase de entrenamiento.
+
+\subsubsection{Modelo baseline}
+
+El primer modelo que probamos fue una regresión lineal con regularización Ridge sobre las
+features adimensionales del reservorio. Con este modelo no buscamos alcanzar buena performance, 
+sino establecer una cota inferior empírica contra la cual comparar los modelos posteriores.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|}
+  \hline
+  \textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+  \hline
+  Norne test (in-distribution) & 0.959 & 35.23 \\
+  \hline
+  Volve (cross-reservoir) & -891.83 & 8166.51 \\
+  \hline
+\end{tabular}
+\caption{Métricas del modelo baseline (regresión Ridge).}
+\label{tab:metricas-baseline}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/baseline_norne_trayectoria.png}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo baseline}
+\label{fig:baseline-norne-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/baseline_norne_parity.png}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo baseline}
+\label{fig:baseline-norne-parity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/baseline_volve_trayectoria.png}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo baseline}
+\label{fig:baseline-volve-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/baseline_volve_parity.png}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo baseline}
+\label{fig:baseline-volve-parity}
+\end{figure}
+
+A partir de los valores del coeficiente de determinación (0.959 para Norne, -891.83 para Volve), 
+se puede deducir que claramente el modelo overfittea para los datos de entrenamiento, y no logra
+extrapolar la predicción para reservorios con una distribución distinta a la de Norne.
 
 
-% Ejemplo de figura numerada con descripción:
-% \begin{figure}[ht]
-% \centering
-% \includegraphics[width=0.7\textwidth]{imagen.png}
-% \caption{Breve descripción de la figura.}
-% \label{fig:ejemplo}
-% \end{figure}
+\subsubsection{Random Forest}
 
-% Ejemplo de tabla numerada con descripción:
-% \begin{table}[ht]
-% \centering
-% \caption{Breve descripción de la tabla.}
-% \begin{tabular}{|c|c|}
-% \hline
-% Col1 & Col2 \\ \hline
-% Dato & Dato \\ \hline
-% \end{tabular}
-% \label{tab:ejemplo}
-% \end{table}
+Una vez realizadas las pruebas con un modelo baseline, procedimos a entrenar un modelo Random Forest,
+con el objetivo de capturar interacciones no lineales entre las features que la regresión lineal no podía representar.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo Random Forest.}
+\label{tab:metricas-rf}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.977 & 22.99 \\
+\hline
+Volve (cross-reservoir) & -9.03 & 842.43 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/random_forest_norne_trayectoria.png}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo random forest}
+\label{fig:rf-norne-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/random_forest_norne_parity.png}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo random forest}
+\label{fig:rf-norne-parity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/random_forest_volve_trayectoria.png}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo random forest}
+\label{fig:rf-volve-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/random_forest_volve_parity.png}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo random forest}
+\label{fig:rf-volve-parity}
+\end{figure}
+
+Random Forest presenta una mejora respecto al modelo baseline sobre Norne: el R² sube de 0.96 a 0.98 y el MAE
+baja de 35 a 23 psi. Sin embargo, el modelo no logra extrapolar estos resultados al reservorio Volve,
+el R² es de -9.03 y el MAE supera los 800 psi. Aunque las predicciones ya no son tan extremas
+como las del baseline lineal, la incapacidad de generalizar fuera de la distribución de
+entrenamiento se mantiene.
+
+\subsubsection{XGBoost}
+
+El siguiente modelo a evaluar es XGBoost, es un modelo de árboles un poco más complejo,
+que en general supera a Random Forest en problemas tabulares.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo XGBoost.}
+\label{tab:metricas-xgboost}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.986 & 19.80 \\
+\hline
+Volve (cross-reservoir) & -9.93 & 864.89 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/xgboost_norne_trayectoria.png}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo XGBoost}
+\label{fig:xgb-norne-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/xgboost_norne_parity.png}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo XGBoost}
+\label{fig:xgb-norne-parity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/xgboost_volve_trayectoria.png}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo XGBoost}
+\label{fig:xgb-volve-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/xgboost_volve_parity.png}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo XGBoost}
+\label{fig:xgb-volve-parity}
+\end{figure}
+
+XGBoost obtiene la mejor performance in-distribution sobre Norne de los modelos probados:
+R² = 0.986 y MAE de apenas 19.80 psi, valores muy superiores al baseline. Sin embargo,
+mantiene la misma incapacidad de generalizar entre reservorios: el R² sobre Volve es de
+-9.93 y el MAE de 865 psi.
+
+
+\subsubsection{LSTM}
+
+En vista de que los modelos lineales y de árboles no son capaces de aprender la física subyacente
+del problema, decidimos probar un modelo LSTM, que suele tener buen rendimiento sobre datos basados
+en series de tiempo.
+
+\begin{table}[ht]
+\centering
+\caption{Métricas del modelo LSTM}
+\label{tab:metricas-lstm}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+\hline
+Norne test (in-distribution) & 0.910 & 51.70 \\
+\hline
+Volve (cross-reservoir) & 0.735 & 101.90 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/lstm_norne_trayectoria.png}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo LSTM}
+\label{fig:lstm-norne-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/lstm_norne_parity.png}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo LSTM}
+\label{fig:lstm-norne-parity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/validacion/lstm_volve_trayectoria.png}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo LSTM}
+\label{fig:lstm-volve-traj}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/validacion/lstm_volve_parity.png}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo LSTM}
+\label{fig:lstm-volve-parity}
+\end{figure}
+
+A diferencia de los otros modelos, podemos ver que LSTM logra buenos resultados tanto para el reservorio
+Norne como para Volve, es decir, es capaz de generalizar la predicción entre reservorios distintos.
+
+En Norne, el modelo alcanza un R² de 0.91 en el test in-distribution, un valor
+algo más bajo que XGBoost en su propio reservorio (0.99). Sin embargo, el resultado más interesante
+está en los resultados de las predicciones de Volve, ya que se consigue un R² de 0.735 con un MAE 
+de 101.9 psi, mientras que los otros modelos no superaban valores negativos.
+
+El modelo LSTM logra generar predicciones que mantienen la forma general de la trayectoria
+de presión de cada simulación de Volve, en contraste con los modelos lineales y de árboles,
+que predicen valores muy fuera del rango físico real.
+
+\subsubsection{Comparación final entre modelos}
+
+Los gráficos \ref{fig:comparacion-mae} y \ref{fig:comparacion-r2} comparan visualmente las
+métricas de los cuatro modelos sobre los dos splits. Dado que todos fueron entrenados con el
+mismo protocolo (24 simulaciones de Norne como train, 6 como test, las 10 simulaciones de
+Volve como evaluación cross-reservoir), la comparación es directa.
+
+El gráfico de MAE usa escala logarítmica porque el rango de errores cubre tres órdenes de
+magnitud entre el mejor caso (XGBoost en Norne, 19.8 psi) y el peor (Ridge en Volve, más de
+8000 psi). En el gráfico de R², el valor del baseline en Volve ($-891.83$) está truncado
+para no ofuscar al resto de la escala.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{img/validacion/comparacion_mae.png}
+\caption{Comparación del MAE entre los cuatro modelos, en Norne (in-distribution) y Volve
+(cross-reservoir). Escala logarítmica en el eje vertical.}
+\label{fig:comparacion-mae}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{img/validacion/comparacion_r2.png}
+\caption{Comparación del R² entre los cuatro modelos.}
+\label{fig:comparacion-r2}
+\end{figure}
+
+A partir de los gráficos se ve con claridad lo que ya habíamos observado en los análisis
+individuales de cada modelo: el modelo LSTM es el único que logra transferir entre
+reservorios. Los demás modelos alcanzan métricas muy buenas in-distribution sobre
+Norne pero colapsan al evaluar sobre Volve, mientras que el LSTM mantiene un R² positivo y
+un MAE varios órdenes de magnitud menor en el split cross-reservoir.
 
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
