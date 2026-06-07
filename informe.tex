@@ -388,6 +388,33 @@ El sistema está compuesto una aplicación web (frontend y backend) y un modelo 
 
 En las siguientes secciones se detalla cada componente en profundidad.
 
+\subsubsection{Aplicación Web}
+
+El sistema está compuesto por una arquitectura cliente-servidor, donde el frontend permite la interacción con el usuario y 
+el backend se encarga del procesamiento de datos, autenticación y ejecución del modelo predictivo.
+
+La aplicación permite a los usuarios registrarse e iniciar sesión, gestionando el acceso a las funcionalidades mediante 
+autenticación. Una vez dentro del sistema, el usuario puede cargar diferentes tipos de datos necesarios para la estimación:
+\begin{itemize}
+\item Datos de producción en formato CSV (series temporales).
+\item Datos PVT (propiedades termodinámicas del fluido).
+\item Parámetros del reservorio en formato estructurado (por ejemplo, archivos TOML).
+\end{itemize}
+
+Estos datos son procesados por el backend —desarrollado en Python— que integra un modelo de machine learning previamente 
+entrenado. El modelo es capaz de combinar información temporal, física y termodinámica para generar una estimación de la 
+presión del reservorio.
+
+En cuanto a la visualización, el frontend —desarrollado con TypeScript y React— presenta los resultados de manera interactiva y 
+clara para el usuario. Se incluyen gráficos que permiten analizar la evolución de la presión estimada a lo largo del tiempo.
+
+Asimismo, la interfaz incorpora componentes que facilitan la interpretación de los resultados, permitiendo identificar la influencia 
+de las distintas variables de entrada en el comportamiento del modelo. De esta manera, no solo se muestra el valor estimado, sino que 
+también se brinda contexto para su análisis y comprensión.
+
+Además, la aplicación está diseñada con una arquitectura modular que separa claramente las responsabilidades en capas 
+(dominio, infraestructura, repositorios, rutas), facilitando la mantenibilidad y escalabilidad del sistema.
+
 \subsubsection{Modelo de Machine Learning}
 
 El objetivo del modelo es predecir, a lo largo del tiempo, la presión promedio del reservorio a partir de datos operativos
@@ -598,33 +625,6 @@ Lo resolvimos agregando un \textbf{encoder de PVT}, un módulo pequeño que se e
 función es comprimir toda la tabla PVT a un vector resumen compacto. Ese vector se le pasa al
 modelo principal como un dato adicional por simulación, de manera que la información termodinámica
 del fluido influya en la predicción sin opacar a las variables que cambian con el tiempo.
-
-\subsubsection{Aplicación Web}
-
-El sistema está compuesto por una arquitectura cliente-servidor, donde el frontend permite la interacción con el usuario y 
-el backend se encarga del procesamiento de datos, autenticación y ejecución del modelo predictivo.
-
-La aplicación permite a los usuarios registrarse e iniciar sesión, gestionando el acceso a las funcionalidades mediante 
-autenticación. Una vez dentro del sistema, el usuario puede cargar diferentes tipos de datos necesarios para la estimación:
-\begin{itemize}
-\item Datos de producción en formato CSV (series temporales).
-\item Datos PVT (propiedades termodinámicas del fluido).
-\item Parámetros del reservorio en formato estructurado (por ejemplo, archivos TOML).
-\end{itemize}
-
-Estos datos son procesados por el backend —desarrollado en Python— que integra un modelo de machine learning previamente 
-entrenado. El modelo es capaz de combinar información temporal, física y termodinámica para generar una estimación de la 
-presión del reservorio.
-
-En cuanto a la visualización, el frontend —desarrollado con TypeScript y React— presenta los resultados de manera interactiva y 
-clara para el usuario. Se incluyen gráficos que permiten analizar la evolución de la presión estimada a lo largo del tiempo.
-
-Asimismo, la interfaz incorpora componentes que facilitan la interpretación de los resultados, permitiendo identificar la influencia 
-de las distintas variables de entrada en el comportamiento del modelo. De esta manera, no solo se muestra el valor estimado, sino que 
-también se brinda contexto para su análisis y comprensión.
-
-Además, la aplicación está diseñada con una arquitectura modular que separa claramente las responsabilidades en capas 
-(dominio, infraestructura, repositorios, rutas), facilitando la mantenibilidad y escalabilidad del sistema.
 
 % ============================================================
 % 12. METODOLOGÍA APLICADA
