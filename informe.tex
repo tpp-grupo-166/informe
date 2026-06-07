@@ -697,33 +697,33 @@ de datos como visualización e interacción con el usuario.
 % ============================================================
 \section{Experimentación y/o validación}
 
-\section{Experimentación y/o validación}
+Durante el entrenamiento de los modelos se realizaron múltiples pruebas para validar la efectividad de los mismos,
+compararlos, y decidir cuál utilizar en el proyecto:
 
-\subsection{Metodología experimental}
-
-El objetivo central del experimento es evaluar la capacidad del modelo de generalizar entre
-reservorios distintos. Para eso definimos dos tipos de evaluación que se aplican a todos los
-modelos del trabajo de forma idéntica:
+Dado que contamos con dos modelos de reservorio (Norne y Volve), esto nos permitió validar
+que el modelo es capaz de generalizar entre reservorios distintos. En este contexto, realizamos
+dos tipos de pruebas:
 
 \begin{itemize}
   \item \textbf{Evaluación in-distribution}: el modelo se entrena con 24 de las 30 simulaciones
-  de Norne y se evalúa sobre las 6 simulaciones restantes de Norne, que no vio durante el
-  entrenamiento. Mide qué tan bien el modelo aprende la dinámica del campo dentro de su
-  distribución de entrenamiento.
+  de Norne y se evalúa sobre las 6 simulaciones restantes de Norne. Esto nos permite medir qué
+  tan bien el modelo predice la presión del campo con el que fue entrenado.
 
   \item \textbf{Evaluación cross-reservoir}: el modelo se evalúa sobre las 10 simulaciones
-  completas de Volve, un reservorio al que nunca fue expuesto durante el entrenamiento. Es la
-  prueba central del trabajo, ya que mide si el modelo aprendió la física subyacente o si
-  solamente memorizó la distribución particular de Norne.
+  completas de Volve, un reservorio al que nunca fue expuesto durante el entrenamiento. Esto nos
+  permite saber si el modelo aprendió la física subyacente o si solamente memorizó la distribución particular de Norne.
 \end{itemize}
 
-Las métricas que reportamos son R² (coeficiente de determinación, que mide qué fracción de la
-varianza del target explica el modelo) y MAE (mean absolute error, en psi, el error promedio
-absoluto en la misma unidad física que la presión del reservorio). Los plots de cada modelo
-siguen una convención común: trayectorias de presión por simulación (una grilla con un panel
-por sim, mostrando la presión real frente a la predicha en función del tiempo) y un parity
-plot global (scatter de presión real frente a predicha sobre todos los timesteps, con la
-diagonal $y = x$ de referencia).
+Para definir la calidad de los modelos, nos basamos en las siguientes métricas:
+\begin{itemize}
+  \item \textbf{R² (coeficiente de determinación)}: mide qué fracción de la varianza del target explica el modelo.
+  \item \textbf{MAE (Mean Absolute Error)}: el error promedio absoluto en la misma unidad física que la presión del reservorio (psi).
+\end{itemize}
+
+Los plots de cada modelo siguen una convención común: una trayectoria de presión correspondiente a una simulación
+representativa del split, mostrando la presión real frente a la predicha en función del
+tiempo, y un parity plot global (scatter de presión real frente a predicha sobre todos los
+timesteps del split, con la diagonal $y = x$ de referencia).
 
 Todos los modelos comparten además el mismo conjunto de features adimensionales descripto en
 la sección anterior, de manera que la única diferencia entre experimentos es la familia de
@@ -754,9 +754,9 @@ Volve (cross-reservoir) & -891.83 & 8166.51 \\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/baseline_norne_trayectorias.png}
-\caption{Baseline Ridge, test in-distribution sobre Norne: trayectoria de presión por
-simulación, con la presión real en negro y la predicha en azul punteado.}
+\includegraphics[width=0.8\textwidth]{img/validacion/baseline_norne_trayectoria.png}
+\caption{Baseline Ridge, test in-distribution sobre Norne: trayectoria de presión de una
+simulación representativa, con la presión real en negro y la predicha en azul punteado.}
 \label{fig:baseline-norne-traj}
 \end{figure}
 
@@ -769,14 +769,15 @@ simulación, con la presión real en negro y la predicha en azul punteado.}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/baseline_volve_trayectorias.png}
-\caption{Baseline Ridge, evaluación cross-reservoir sobre Volve.}
+\includegraphics[width=0.8\textwidth]{img/validacion/baseline_volve_trayectoria.png}
+\caption{Baseline Ridge, evaluación cross-reservoir sobre Volve: trayectoria de presión de
+una simulación representativa.}
 \label{fig:baseline-volve-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/baseline_volve_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/baseline_volve_parity.png}
 \caption{Baseline Ridge, parity plot sobre Volve. Las predicciones quedan muy por fuera del
 rango real de presión.}
 \label{fig:baseline-volve-parity}
@@ -822,29 +823,30 @@ Volve (cross-reservoir) & -9.03 & 842.43 \\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/random_forest_norne_trayectorias.png}
-\caption{Random Forest, test in-distribution sobre Norne: trayectoria de presión por
-simulación.}
+\includegraphics[width=0.8\textwidth]{img/validacion/random_forest_norne_trayectoria.png}
+\caption{Random Forest, test in-distribution sobre Norne: trayectoria de presión de una
+simulación representativa.}
 \label{fig:rf-norne-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/random_forest_norne_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/random_forest_norne_parity.png}
 \caption{Random Forest, test in-distribution sobre Norne: parity plot global.}
 \label{fig:rf-norne-parity}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/random_forest_volve_trayectorias.png}
-\caption{Random Forest, evaluación cross-reservoir sobre Volve.}
+\includegraphics[width=0.8\textwidth]{img/validacion/random_forest_volve_trayectoria.png}
+\caption{Random Forest, evaluación cross-reservoir sobre Volve: trayectoria de presión de
+una simulación representativa.}
 \label{fig:rf-volve-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/random_forest_volve_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/random_forest_volve_parity.png}
 \caption{Random Forest, parity plot sobre Volve.}
 \label{fig:rf-volve-parity}
 \end{figure}
@@ -877,28 +879,30 @@ Volve (cross-reservoir) & -9.93 & 864.89 \\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/xgboost_norne_trayectorias.png}
-\caption{XGBoost, test in-distribution sobre Norne: trayectoria de presión por simulación.}
+\includegraphics[width=0.8\textwidth]{img/validacion/xgboost_norne_trayectoria.png}
+\caption{XGBoost, test in-distribution sobre Norne: trayectoria de presión de una simulación
+representativa.}
 \label{fig:xgb-norne-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/xgboost_norne_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/xgboost_norne_parity.png}
 \caption{XGBoost, test in-distribution sobre Norne: parity plot global.}
 \label{fig:xgb-norne-parity}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/xgboost_volve_trayectorias.png}
-\caption{XGBoost, evaluación cross-reservoir sobre Volve.}
+\includegraphics[width=0.8\textwidth]{img/validacion/xgboost_volve_trayectoria.png}
+\caption{XGBoost, evaluación cross-reservoir sobre Volve: trayectoria de presión de una
+simulación representativa.}
 \label{fig:xgb-volve-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/xgboost_volve_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/xgboost_volve_parity.png}
 \caption{XGBoost, parity plot sobre Volve.}
 \label{fig:xgb-volve-parity}
 \end{figure}
@@ -954,30 +958,31 @@ Volve (cross-reservoir) & 0.735 & 101.90 \\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/lstm_norne_trayectorias.png}
+\includegraphics[width=0.8\textwidth]{img/validacion/lstm_norne_trayectoria.png}
 \caption{LSTM con encoder de PVT, test in-distribution sobre Norne: trayectoria de presión
-por simulación.}
+de una simulación representativa.}
 \label{fig:lstm-norne-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/lstm_norne_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/lstm_norne_parity.png}
 \caption{LSTM con encoder de PVT, test in-distribution sobre Norne: parity plot global.}
 \label{fig:lstm-norne-parity}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{img/lstm_volve_trayectorias.png}
+\includegraphics[width=0.8\textwidth]{img/validacion/lstm_volve_trayectoria.png}
 \caption{LSTM con encoder de PVT, evaluación cross-reservoir sobre Volve: trayectoria de
-presión por simulación. Ninguna de las simulaciones fue vista durante el entrenamiento.}
+presión de una simulación representativa. La simulación no fue vista durante el
+entrenamiento.}
 \label{fig:lstm-volve-traj}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/lstm_volve_parity.png}
+\includegraphics[width=0.6\textwidth]{img/validacion/lstm_volve_parity.png}
 \caption{LSTM con encoder de PVT, parity plot sobre Volve. La nube de puntos se mantiene
 cercana a la diagonal a pesar de que el modelo nunca vio el reservorio durante el
 entrenamiento.}
