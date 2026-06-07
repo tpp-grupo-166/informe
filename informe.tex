@@ -86,8 +86,11 @@
   \centering
   \thispagestyle{empty}
 
-  {\fontsize{14}{17}\selectfont Universidad de Buenos Aires\par}
-  {\fontsize{14}{17}\selectfont Facultad de Ingeniería\par}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/logo_fiuba.png}
+  \end{figure}
+
   \vspace{3cm}
 
   {\fontsize{16}{19}\bfseries Data Analytics para la estimación\\
@@ -96,22 +99,26 @@
   \vspace{1.5cm}
 
   {\fontsize{12}{15}\selectfont
-  \textbf{Tutor:} Dr. Hernán Merlino\\[0.3cm]
-  \textbf{Co-tutor:} Dra. Gabriela Savioli\par}
+  \textbf{Director:} Dr. Hernán Merlino (hmerlino@fi.uba.ar )\\[0.3cm]
+  \textbf{Co-directora:} Dra. Gabriela Savioli (gsavioli@fi.uba.ar) \par}
 
   \vspace{2.5cm}
 
   {\fontsize{14}{17}\bfseries Integrantes\par}
   \vspace{0.5cm}
-
-  {\fontsize{11}{16.5}\selectfont
-  \renewcommand{\arraystretch}{1.4}
-  \begin{tabular}{lcl}
-  Alan Valdevenito   & 107585 & avaldevenito@fi.uba.ar \\
-  Franco Bragantini  & 97190  & fbragantini@fi.uba.ar  \\
-  Mateo Rico         & 108127 & mrico@fi.uba.ar        \\
-  Máximo Palopoli    & 108755 & mpalopoli@fi.uba.ar    \\
-  \end{tabular}\par}
+  \begin{tabular}{|l|l|c|}
+    \hline
+    \textbf{Nombre} & \textbf{Email} & \textbf{Padrón} \\
+    \hline
+    Alan Valdevenito   & avaldevenito@fi.uba.ar & 107585 \\
+    \hline
+    Franco Bragantini  & fbragantini@fi.uba.ar  & 97190  \\
+    \hline
+    Mateo Rico         & mrico@fi.uba.ar        & 108127 \\
+    \hline
+    Máximo Palopoli    & mpalopoli@fi.uba.ar    & 108755 \\
+    \hline
+  \end{tabular}
 
   \vfill
 
@@ -437,7 +444,7 @@ elección del LSTM como modelo final.
 
 \paragraph{Esquema de datos}
 
-El esquema de columnas del dataset fue propuesto por nuestros tutores con un objetivo concreto: que el modelo tenga 
+El esquema de columnas del dataset fue propuesto por nuestros directores con un objetivo concreto: que el modelo tenga 
 a disposición toda la información que aparece en la \textbf{ecuación de balance de masa}, que es la 
 ecuación física que gobierna la evolución de la presión del reservorio. La MBE relaciona la producción acumulada 
 de fluidos, la inyección acumulada, las propiedades termodinámicas del fluido y la geometría del reservorio con el 
@@ -606,7 +613,7 @@ escala fija de 5000 psi. El resultado es un target chico y cercano a cero, más 
 entrenar la red neuronal y que elimina la dependencia con el punto de partida particular de cada
 corrida.
 
-Además de aplicar normalizaciones, también creamos nuevas features (sugeridas por nuestros tutores) a partir de relaciones 
+Además de aplicar normalizaciones, también creamos nuevas features (sugeridas por nuestros directores) a partir de relaciones 
 entre las columnas originales del dataset:
 
 \begin{itemize}
