@@ -973,24 +973,13 @@ para no aplastar al resto de la escala; los demás valores se ven con claridad.
 \label{fig:comparacion-r2}
 \end{figure}
 
-La conclusión principal del experimento es que los tres modelos clásicos no logran transferir
-entre reservorios. Cada uno alcanza valores in-distribution sobre Norne muy buenos, pero
-todos colapsan al evaluar sobre Volve: R² negativos para los tres y MAE entre 800 y 8000 psi.
-El modelo más sofisticado del grupo (XGBoost) no es la excepción, lo cual sugiere que la
-mera adición de capacidad expresiva al modelo, sin mecanismos para representar la naturaleza
-temporal del problema y las propiedades del fluido, no es suficiente para que el modelo
-aprenda la física subyacente del reservorio.
+A partir de los gráficos se ve con claridad lo que ya habíamos observado en los análisis
+individuales de cada modelo: el modelo LSTM es el único que logra transferir entre
+reservorios. Los demás modelos alcanzan métricas muy buenas in-distribution sobre
+Norne pero colapsan al evaluar sobre Volve, mientras que el LSTM mantiene un R² positivo y
+un MAE varios órdenes de magnitud menor en el split cross-reservoir.
 
-El LSTM con encoder de PVT muestra el comportamiento opuesto. Su R² in-distribution sobre
-Norne (0.910) es algo más bajo que el de XGBoost, pero su R² cross-reservoir sobre Volve
-(0.735) está muy por encima de cualquiera de los modelos clásicos. La diferencia estructural
-que explica este comportamiento es doble: por un lado, el LSTM procesa la serie temporal como
-una secuencia, lo que le permite incorporar la historia de extracción e inyección en la
-predicción de cada timestep. Por el otro, el encoder de PVT le da al modelo acceso a las
-propiedades termodinámicas del fluido del reservorio sobre el que está prediciendo, lo cual
-le permite ajustar su respuesta a un fluido distinto del que vio durante el entrenamiento.
-
-Por estas razones nos quedamos con el LSTM con encoder de PVT como modelo final del trabajo.
+Por estas razones nos quedamos con el LSTM como modelo final del trabajo.
 
 
 % ============================================================
