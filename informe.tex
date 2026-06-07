@@ -720,24 +720,15 @@ Para definir la calidad de los modelos, nos basamos en las siguientes métricas:
   \item \textbf{MAE (Mean Absolute Error)}: el error promedio absoluto en la misma unidad física que la presión del reservorio (psi).
 \end{itemize}
 
-Los plots de cada modelo siguen una convención común: una trayectoria de presión correspondiente a una simulación
-representativa del split, mostrando la presión real frente a la predicha en función del
-tiempo, y un parity plot global (scatter de presión real frente a predicha sobre todos los
-timesteps del split, con la diagonal $y = x$ de referencia).
-
-Todos los modelos comparten además el mismo conjunto de features adimensionales descripto en
-la sección anterior, de manera que la única diferencia entre experimentos es la familia de
-modelo elegida.
+A continuación se presenta un análisis comparativo de todos los modelos que se probaron durante la fase de entrenamiento.
 
 \subsection{Modelo baseline}
 
 El primer modelo que probamos fue una regresión lineal con regularización Ridge sobre las
-features adimensionales del reservorio. La elección no buscaba alcanzar buena performance
+features adimensionales del reservorio. Con este modelo no buscamos alcanzar buena performance, 
 sino establecer una cota inferior empírica contra la cual comparar los modelos posteriores.
-El valor del coeficiente de regularización se eligió mediante búsqueda con GridSearchCV usando
-un esquema GroupKFold para que cada fold contenga simulaciones completas sin partir timesteps.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Métricas del modelo baseline (regresión Ridge).}
 \label{tab:metricas-baseline}
@@ -755,31 +746,28 @@ Volve (cross-reservoir) & -891.83 & 8166.51 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/baseline_norne_trayectoria.png}
-\caption{Baseline Ridge, test in-distribution sobre Norne: trayectoria de presión de una
-simulación representativa, con la presión real en negro y la predicha en azul punteado.}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo baseline}
 \label{fig:baseline-norne-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/baseline_norne_parity.png}
-\caption{Baseline Ridge, test in-distribution sobre Norne: parity plot global.}
+\caption{Parity plot entre la presión real de Norne vs la presión predicha por el modelo baseline}
 \label{fig:baseline-norne-parity}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/baseline_volve_trayectoria.png}
-\caption{Baseline Ridge, evaluación cross-reservoir sobre Volve: trayectoria de presión de
-una simulación representativa.}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo baseline}
 \label{fig:baseline-volve-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/baseline_volve_parity.png}
-\caption{Baseline Ridge, parity plot sobre Volve. Las predicciones quedan muy por fuera del
-rango real de presión.}
+\caption{Parity plot entre la presión real de Volve vs la presión predicha por el modelo baseline}
 \label{fig:baseline-volve-parity}
 \end{figure}
 
