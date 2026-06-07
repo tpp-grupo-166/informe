@@ -883,38 +883,16 @@ R² = 0.986 y MAE de apenas 19.80 psi, valores muy superiores al baseline. Sin e
 mantiene la misma incapacidad de generalizar entre reservorios: el R² sobre Volve es de
 -9.93 y el MAE de 865 psi.
 
-\subsubsection{Análisis de los modelos clásicos}
 
-Los tres modelos clásicos comparten un patrón consistente y bastante revelador. Cada uno
-mejora a su antecesor en métricas in-distribution sobre Norne (el baseline alcanza R² = 0.96,
-Random Forest sube a 0.98 y XGBoost a 0.99), lo cual indicaría buen ajuste si el problema
-fuera predecir la presión dentro del mismo reservorio. Pero el rendimiento cross-reservoir
-sobre Volve no mejora con la complejidad: el R² es negativo para los tres modelos.
+\subsection{LSTM}
 
-La explicación de este comportamiento se encuentra en la naturaleza no secuencial de estos
-modelos. Tratan cada timestep como una muestra independiente y aprenden el mapeo entre
-features operativas y presión que mejor se ajusta a la distribución particular de Norne.
-Cuanto más flexible es el modelo, más fielmente memoriza esa distribución específica, y menos
-generaliza a un reservorio con escalas, geometría y propiedades de fluido distintas. Esta
-limitación motivó la transición a modelos que puedan aprovechar la dependencia temporal del
-problema y que puedan incorporar explícitamente la información termodinámica del fluido como
-contexto adicional.
-
-\subsection{Modelos recurrentes (LSTM)}
-
-El siguiente paso fue una arquitectura recurrente. Como se discutió en la sección anterior,
-el modelo final es una LSTM extendida con un encoder de PVT que le permite condicionar las
-predicciones a las propiedades termodinámicas del fluido.
-
-\subsubsection{LSTM con encoder de PVT}
-
-El entrenamiento se realizó sobre 24 de las 30 simulaciones de Norne, dejando 6 simulaciones
-como test in-distribution. La evaluación cross-reservoir se hizo sobre las 10 simulaciones
-completas de Volve, con sus tablas PVT canónicas del laboratorio.
+En vista de que los modelos lineales y de árboles no son capaces de aprender la física subyacente
+del problema, decidimos probar un modelo LSTM, que suele tener buen rendimiento sobre datos basados
+en series de tiempo.
 
 \begin{table}[ht]
 \centering
-\caption{Métricas del modelo LSTM con encoder de PVT.}
+\caption{Métricas del modelo LSTM}
 \label{tab:metricas-lstm}
 \begin{tabular}{|l|c|c|}
 \hline
@@ -930,48 +908,42 @@ Volve (cross-reservoir) & 0.735 & 101.90 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/lstm_norne_trayectoria.png}
-\caption{LSTM con encoder de PVT, test in-distribution sobre Norne: trayectoria de presión
-de una simulación representativa.}
+\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo LSTM}
 \label{fig:lstm-norne-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/lstm_norne_parity.png}
-\caption{LSTM con encoder de PVT, test in-distribution sobre Norne: parity plot global.}
+\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo LSTM}
 \label{fig:lstm-norne-parity}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{img/validacion/lstm_volve_trayectoria.png}
-\caption{LSTM con encoder de PVT, evaluación cross-reservoir sobre Volve: trayectoria de
-presión de una simulación representativa. La simulación no fue vista durante el
-entrenamiento.}
+\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo LSTM}
 \label{fig:lstm-volve-traj}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\textwidth]{img/validacion/lstm_volve_parity.png}
-\caption{LSTM con encoder de PVT, parity plot sobre Volve. La nube de puntos se mantiene
-cercana a la diagonal a pesar de que el modelo nunca vio el reservorio durante el
-entrenamiento.}
+\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo LSTM}
 \label{fig:lstm-volve-parity}
 \end{figure}
 
-Los resultados muestran un comportamiento cualitativamente distinto al de los modelos
-clásicos. En Norne, el modelo alcanza un R² de 0.91 en el test in-distribution, un valor
-algo más bajo que XGBoost en su propio reservorio (0.99). La diferencia clave está en Volve:
-el R² cross-reservoir del LSTM es de 0.735 con un MAE de 101.9 psi, mientras que los modelos
-clásicos no superaban valores negativos. La LSTM genera predicciones que mantienen la forma
-general de la trayectoria de presión de cada simulación de Volve, en contraste con los
-modelos clásicos que predicen valores muy fuera del rango físico real.
+A diferencia de los otros modelos, podemos ver que LSTM logra buenos resultados tanto para el reservorio
+Norne como para Volve, es decir, es capaz de generalizar la predicción entre reservorios distintos.
 
-El intercambio es interesante de observar: el LSTM sacrifica algo de precisión in-distribution
-respecto de los modelos clásicos a cambio de una capacidad de generalización cualitativamente
-superior. Esto refleja el efecto de no usar la presión inicial como feature directa sino como
-referencia de normalización del target.
+En Norne, el modelo alcanza un R² de 0.91 en el test in-distribution, un valor
+algo más bajo que XGBoost en su propio reservorio (0.99). Sin embargo, el resultado más interesante
+está en los resultados de las predicciones de Volve, ya que se consigue un R² de 0.735 con un MAE 
+de 101.9 psi, mientras que los modelos clásicos no superaban valores negativos.
+
+El modelo LSTM logra generar predicciones que mantienen la forma general de la trayectoria
+de presión de cada simulación de Volve, en contraste con los modelos lineales y de árboles,
+que predicen valores muy fuera del rango físico real.
 
 \subsection{Comparación final entre modelos}
 
