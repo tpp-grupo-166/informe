@@ -727,7 +727,7 @@ Para definir la calidad de los modelos, nos basamos en las siguientes métricas:
   \item \textbf{MAE (Mean Absolute Error)}: el error promedio absoluto en la misma unidad física que la presión del reservorio (psi).
 \end{itemize}
 
-\subsection{Análisis comparativo del rendimiento de los modelos de machine learning}
+\subsection{Evaluación y análisis comparativo de los modelos de machine learning}
 
 A continuación se presenta un análisis comparativo de todos los modelos que se probaron durante la fase de entrenamiento.
 
@@ -739,17 +739,17 @@ sino establecer una cota inferior empírica contra la cual comparar los modelos 
 
 \begin{table}[H]
 \centering
+\begin{tabular}{|l|c|c|}
+  \hline
+  \textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
+  \hline
+  Norne test (in-distribution) & 0.959 & 35.23 \\
+  \hline
+  Volve (cross-reservoir) & -891.83 & 8166.51 \\
+  \hline
+\end{tabular}
 \caption{Métricas del modelo baseline (regresión Ridge).}
 \label{tab:metricas-baseline}
-\begin{tabular}{|l|c|c|}
-\hline
-\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} \\
-\hline
-Norne test (in-distribution) & 0.959 & 35.23 \\
-\hline
-Volve (cross-reservoir) & -891.83 & 8166.51 \\
-\hline
-\end{tabular}
 \end{table}
 
 \begin{figure}[H]
