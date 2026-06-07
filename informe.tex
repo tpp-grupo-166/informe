@@ -549,6 +549,46 @@ como la presión, caudales de inyección y producción, en función del tiempo.
   \label{fig:presion_volve}
 \end{figure}
 
+\paragraph{Normalización de datos y Feature Engineering}
+
+A partir del análisis exploratorio del dataset, encontramos que los reservorios de Volve y Norne
+operan en rangos muy distintos de presión, caudales de producción y volúmenes acumulados, lo cual
+era esperable dado que se trata de campos de tamaños muy diferentes (Norne es aproximadamente 6 veces
+mas grande que Volve). Esto nos llevó a aplicar varias normalizaciones a los datos antes de pasarlos al modelo.
+
+La primera fue dividir las cantidades dependientes del tamaño del campo (producciones acumuladas,
+caudales de producción e inyección) por el pore-volume del reservorio, que es el volumen total que
+podría llenarse con fluido. De esta forma el modelo ve fracciones del volumen recuperado en lugar
+de barriles absolutos, y Norne y Volve se vuelven comparables a pesar de las diferencias de escala.
+
+La segunda fue normalizar la presión, es decir, en lugar de predecir el valor absoluto de la presión
+(que está en el orden de 3000 - 5000 psi), predecimos la diferencia respecto de la presión inicial del reservorio, dividida por una
+escala fija de 5000 psi. El resultado es un target chico y cercano a cero, más estable para
+entrenar la red neuronal y que elimina la dependencia con el punto de partida particular de cada
+corrida.
+
+Además de aplicar normalizaciones, también creamos nuevas features (sugeridas por nuestros tutores) a partir de relaciones 
+entre las columnas originales del dataset:
+
+\begin{itemize}
+    \item \textbf{Fracciones de fluido recuperado e inyectado}: producciones acumuladas
+    de petróleo y agua e inyección acumulada de agua, divididas por el pore-volume del reservorio.
+    Indican qué proporción del volumen total disponible ya fue extraída o repuesta mediante inyección.
+
+    \item \textbf{Relación gas-petróleo acumulada}: cuánto gas se produjo por
+    cada barril de petróleo hasta el momento.
+
+    \item \textbf{Relación agua-petróleo instantánea}: cuántos barriles de agua
+    se producen por cada barril de petróleo en ese instante. Es un indicador clásico del avance del
+    frente de agua hacia los pozos productores.
+
+    \item \textbf{Water cut acumulado}: porcentaje del total de líquidos
+    producidos que es agua.
+
+    \item \textbf{Voidage replacement ratio simplificado}: relación entre el
+    volumen total inyectado y el volumen total producido. Indica si la inyección de agua compensa la
+    extracción y si se está logrando mantener la presión del reservorio.
+  \end{itemize}
 
 \subsubsection{Aplicación Web}
 
