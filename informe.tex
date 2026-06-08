@@ -1413,27 +1413,40 @@ donde el conocimiento técnico por sí solo no es suficiente.
 \newpage
 \section{Impactos sociales y ambientales del proyecto}
 
-Actualizar esto:
-
-Una estimación precisa de la presión de yacimiento es indispensable en la producción de hidrocarburos, ya
-que define un estrecho ``margen de presión'' operativo que es fundamental para la seguridad, la eficiencia
-y la rentabilidad.
-
-En este contexto, la solución propuesta puede tener impacto en distintos aspectos de la industria:
+Conviene aclarar el alcance antes de avanzar: el trabajo es una prueba de concepto, así
+que lo que sigue son impactos potenciales del enfoque, no resultados ya conseguidos.
+Estimar bien la presión de un yacimiento importa porque define un margen operativo
+estrecho, del que dependen la seguridad y la eficiencia de la operación.
 
 \subsection{Impacto económico}
 
-\begin{itemize}
-  \item \textbf{Optimización de la producción}: permite una mejor planificación de las estrategias de
-  extracción y selección de métodos de recuperación adecuados, reduciendo costos operativos.
-\end{itemize}
+Una mejor estimación de presión ayuda a planificar la extracción y a elegir el método de
+recuperación secundaria, lo que baja costos. También hay un ahorro de cómputo: una vez
+entrenado, el modelo predice en milisegundos, mientras que una simulación numérica completa
+tarda horas o días. Eso permite explorar más escenarios con menos recursos. Por último, la
+interfaz web acerca la estimación a ingenieros sin formación en ciencia de datos, que de
+otro modo dependerían de un especialista.
 
-\subsection{Impacto social y ambiental}
+\subsection{Impacto social}
 
-\begin{itemize}
-  \item \textbf{Reducción de riesgos:} una correcta estimación de la presión puede evitar consecuencias
-  catastróficas como la pérdida de equipos, daños medioambientales e incluso la pérdida de vidas humanas.
-\end{itemize}
+Mantener la presión dentro de un margen seguro reduce el riesgo de eventos graves, como un
+descontrol de pozo o la pérdida de equipos, que pueden costar vidas. Además, el sistema no
+funciona como una ``caja negra'': explica cómo se procesaron los datos y muestra la
+incertidumbre de la predicción, lo que ayuda a tomar decisiones más informadas.
+
+\subsection{Impacto ambiental}
+
+Anticipar problemas de presión ayuda a evitar \textit{blowouts} y derrames, con la
+contaminación que traen. Una mejor gestión de la inyección de agua evita desperdiciar agua
+y energía. Y reemplazar corridas de simulador por inferencias del modelo baja el consumo
+energético del modelado.
+
+\subsection{Consideración sobre el alcance}
+
+Hay que reconocer que la herramienta opera dentro de la industria de los hidrocarburos. Su
+aporte no es extraer más, sino hacer más seguras y eficientes operaciones que ya existen.
+La veta ambiental positiva está ahí: en la prevención de daños y en el uso más cuidadoso
+del agua y la energía.
 
 % ============================================================
 % 18. TRABAJOS FUTUROS (OPCIONAL)
