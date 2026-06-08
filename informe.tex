@@ -649,21 +649,78 @@ del fluido influya en la predicción sin opacar a las variables que cambian con 
 \newpage
 \section{Metodología aplicada}
 
-Se deberá explicar cómo y en qué grado se cumplieron las pautas siguientes:
+El trabajo se organizó de forma incremental, en ciclos marcados por las reuniones de
+seguimiento con los directores. Cada ciclo apuntaba a un objetivo concreto y se revisaba
+con ellos antes de pasar al siguiente.
 
-\begin{itemize}
-  \item Desarrollo incremental, por iteraciones o bajo una modalidad de entrega continua. Qué entregables
-  intermedios hubo y cuál fue la cadencia de prácticas de seguimiento y mejora continua.
-  \item Grado de automatización de las tareas de desarrollo, prueba y despliegue, con indicadores.
-  \item Qué herramienta de versionado de código y de otros artefactos se utilizó.
-  \item Qué herramienta se utilizó para gestionar el proceso de desarrollo, el seguimiento de tickets y bugs, etc.
-  \item Qué artefactos se utilizaron para la gestión del alcance, riesgos, métricas de calidad del
-  producto, criticidad de bugs, indicadores de tiempos y costos, minutas y otros artefactos de gestión de
-  la comunicación con los interesados.
-  \item Cuáles fueron los criterios de aceptación de entregas y pruebas de aceptación de las
-  funcionalidades requeridas.
-  \item Qué indicadores de calidad de proceso se utilizaron.
-\end{itemize}
+\subsection{Desarrollo incremental y entregables}
+
+El desarrollo estuvo condicionado por la disponibilidad de los datos. La etapa inicial se
+dedicó a estudiar el dominio, ya que el equipo tenía poca formación previa en ingeniería
+de reservorios, y a escribir la propuesta, mientras se gestionaba el acceso a datos reales
+de presión de la industria. Esos datos nunca llegaron. Ante eso se optó por datos
+sintéticos: primero generados con modelos de lenguaje y, como no daban suficiente realismo
+físico, después con el simulador OPM Flow, que terminó siendo la fuente de datos del
+proyecto. Recién a partir de ahí el trabajo se centró en probar y comparar modelos
+(baseline lineal, Random Forest, XGBoost y LSTM), construir el MVP de la aplicación web e
+iterar su experiencia de usuario con los directores, para cerrar con este informe.
+
+Hubo tres entregas formales: la propuesta de anteproyecto, una entrega intermedia a mitad
+de proyecto (un video con el estado del trabajo) y este informe final. Entre medio, los
+avances importantes, como los datasets generados o el flujo de carga de la aplicación, se
+mostraban a los directores en reuniones específicas. El seguimiento era quincenal: ahí se
+revisaban los avances y se definían los próximos pasos.
+
+\subsection{Control de versiones}
+
+Se usó Git para versionar el código y GitHub como plataforma, con los repositorios
+agrupados en una organización del equipo. El código se separó por repositorio: uno para
+los experimentos y notebooks, otro para la aplicación web y otro para el informe en
+\LaTeX{}. Para los desarrollos grandes se trabajó con ramas y \textit{pull requests}; los
+cambios chicos iban directo a la rama principal. Antes de integrar, los cambios se
+revisaban entre pares, tanto el código de la aplicación como los notebooks. Hacia el final
+esa revisión se apoyó en el CI, que frena cualquier cambio que rompa las pruebas.
+
+\subsection{Gestión del proceso y seguimiento}
+
+Las tareas y los bugs se siguieron como \textit{issues} en GitHub, complementados con una
+lista de pendientes compartida y la coordinación diaria por mensajería. Con los directores
+y demás interesados la comunicación fue por mensajería y videollamadas.
+
+\subsection{Automatización}
+
+La aplicación web tiene un pipeline de integración continua (CI) con GitHub Actions que
+corre en cada \textit{push} y \textit{pull request}. Ejecuta los tests del backend con
+pytest, exigiendo un mínimo de cobertura, y compila el frontend chequeando tipos. Si el
+pipeline falla, el cambio no se puede integrar. No hay despliegue automático: por ahora la
+aplicación corre en entorno local.
+
+\subsection{Criterios de aceptación}
+
+Un modelo se daba por bueno cuando alcanzaba métricas razonables en las dos evaluaciones,
+\textit{in-distribution} y \textit{cross-reservoir}: un $R^2$ positivo (con 0,5 como
+referencia) y un MAE dentro del rango físico esperado. A eso se sumaba el visto bueno de
+los directores. En la aplicación web, una funcionalidad se consideraba terminada cuando
+funcionaba de extremo a extremo (carga de datos, predicción y visualización), pasaba el CI
+y se validaba en las reuniones.
+
+\subsection{Artefactos de gestión y comunicación}
+
+La comunicación con los interesados se apoyó en minutas de las reuniones, donde quedaban
+registradas las decisiones y los próximos pasos. El alcance se manejó a partir del
+documento de propuesta inicial. Los riesgos se tratan en la sección correspondiente de
+este informe.
+
+\subsection{Indicadores de calidad}
+
+La calidad del producto se midió con las métricas de los modelos ($R^2$ y MAE) y con el
+estado del CI: pruebas en verde y un mínimo de cobertura. Del lado del proceso, se siguió
+que se mantuviera la cadencia de reuniones y que cada cambio pasara por revisión antes de
+integrarse.
+
+El avance del proyecto se midió contra los hitos formales (anteproyecto, entrega
+intermedia e informe final) y por lo que se completaba en cada iteración: datasets
+generados, modelos evaluados y funcionalidades de la aplicación.
 
 % ============================================================
 % 13. HERRAMIENTAS EXTERNAS UTILIZADAS
