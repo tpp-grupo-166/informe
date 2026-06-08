@@ -13,6 +13,7 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{float}
+\usepackage{pgfgantt}
 
 % ====== INTERLINEADO 1,5 ======
 \onehalfspacing
@@ -1127,43 +1128,159 @@ fallan cuando pertenece a un régimen que nunca vieron (SPE9, que cruza el punto
 \newpage
 \section{Cronograma de las actividades realizadas}
 
-El desarrollo del proyecto se llevó a cabo en dos cuatrimestres, cada uno con objetivos y 
-actividades específicas:
 
-\textbf{Primer cuatrimestre (18/08/2025 – 01/12/2025):}
-\begin{itemize}
-\item Estudio del dominio de la ingeniería de reservorios.
-\item Lectura y análisis de bibliografía especializada: Reservoir Engineering Handbook, fourth edition.
-\item Identificación de variables relevantes y comprensión de sus relaciones.
-\item Elaboración y entrega del informe intermedio.
-\end{itemize}
 
-\textbf{Segundo cuatrimestre (09/03/2026 – 10/03/2026):}
-\begin{itemize}
-\item Generación inicial de datos sintéticos mediante LLMs.
-\item Análisis exploratorio de los datos generados.
-\item Exploración de librerias de generación de datos sintéticos (SDV, YData Synthetic, Gretel, etc.).
-\item Validación y discusión de resultados con la experta en dominio.
-\item Evaluación de alternativas para la generación de datos más realistas.
-\item Adopción de OPM Flow como herramienta de simulación.
-\item Selección de datos correspondientes a los reservorios Norne y Volve.
-\item Análisis exploratorio de los nuevos datos.
-\item Entrenamiento y evaluación de modelos de machine learning:
-\begin{itemize}
-\item Modelo baseline (Ridge).
-\item Random Forest.
-\item XGBoost.
-\item LSTM con integración de datos PVT.
-\item Comparación de resultados y selección del modelo final.
-\end{itemize}
-\item Evaluación de tecnologías para el desarrollo de la aplicación web.
-\item Diseño de la arquitectura de la aplicación y definición de endpoints.
-\item Implementación de la API REST para la predicción de presión.
-\item Implementación de la interfaz de usuario para la visualización de resultados.
-\item Integración del modelo con la aplicación.
-\item Visualización de resultados y validación final.
-\item Elaboración del informe final y entrega del proyecto.
-\end{itemize}
+\subsection{Cronograma del segundo cuatrimestre 2025}
+
+A continuación, se presenta el cronograma detallado de las actividades desarrolladas durante el segundo 
+cuatrimestre de 2025, comprendido entre los meses de septiembre y noviembre.
+
+Durante este período se llevaron a cabo tareas clave vinculadas a la definición de la propuesta del proyecto, 
+el estudio del dominio de aplicación, la identificación de variables relevantes y la espera de datos 
+provenientes de la industria necesarios para el desarrollo del modelo de machine learning.
+
+El diagrama de Gantt correspondiente se encuentra organizado en unidades mensuales, lo que permite una 
+visualización clara de la distribución temporal de las actividades a lo largo del cuatrimestre.
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-4cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{3}
+
+\gantttitle{Estudio (Septiembre – Noviembre)}{3} \\
+
+\ganttbar{Propuesta}{1}{1} \\
+\ganttbar{Estudio del dominio}{2}{3} \\
+\ganttbar{Identificación de variables}{2}{3} \\
+\ganttbar{Espera por datos de PAE}{2}{3} \\
+\ganttbar{Hito de mitad de proyecto}{3}{3} \\
+
+\end{ganttchart}
+}
+
+\caption{Estudio del dominio}
+\end{figure}
+
+La propuesta fue entregada el 29 de septiembre de 2025 y fue aprobada el
+13 de octubre de 2025.
+
+El hito de mitad de proyecto fue entregado el 30 de noviembre de 2025.
+
+\newpage
+\subsection{Cronograma del primer cuatrimestre 2026}
+
+A continuación, se presenta el cronograma detallado de las actividades desarrolladas durante el primer 
+cuatrimestre de 2026, comprendido entre los meses de marzo y junio.
+
+En este período se llevaron a cabo tareas fundamentales del proyecto, organizadas en tres grandes ejes: la 
+generación y análisis de datos, el entrenamiento y evaluación de modelos, y el desarrollo de la aplicación web.
+
+Cada uno de los diagramas de Gantt incluidos corresponde a una fase específica, en la que se describen las 
+tareas realizadas junto con su duración y distribución temporal a lo largo del cuatrimestre.
+
+La segmentación en tres diagramas permite evidenciar de manera clara el carácter incremental del desarrollo, 
+destacando la existencia de hitos intermedios y una progresión estructurada hacia la finalización del proyecto.
+
+Por último, cabe destacar que la planificación temporal de cada diagrama se encuentra organizada en unidades 
+semanales, lo que facilita una visualización precisa del avance de las actividades.
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-5cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{4}
+
+\gantttitle{Datos (Marzo)}{4} \\
+
+\ganttbar{Datos sintéticos (LLMs)}{1}{1} \\
+\ganttbar{Datos sintéticos (SDV, YData)}{1}{1} \\
+\ganttbar{EDA}{1}{2} \\
+\ganttbar{OPM Flow}{3}{3} \\
+\ganttbar{EDA}{3}{4}
+
+\end{ganttchart}
+}
+
+\caption{Generación y análisis de datos}
+\end{figure}
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-4cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{4}
+
+\gantttitle{Modelos (Abril)}{4} \\
+
+\ganttbar{Ridge}{1}{3} \\
+\ganttbar{RF}{1}{3} \\
+\ganttbar{XGBoost}{1}{3} \\
+\ganttbar{LSTM + PVT}{2}{3} \\
+\ganttbar{Comparación de modelos}{3}{4} \\
+\ganttbar{Selección de modelo}{4}{4}
+
+\end{ganttchart}
+}
+
+\caption{Entrenamiento y evaluación de modelos}
+\end{figure}
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-4cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{5}
+
+\gantttitle{Aplicación (Mayo-Junio)}{5} \\
+
+\ganttbar{Evaluación de tecnologías}{1}{1} \\
+\ganttbar{Arquitectura}{1}{1} \\
+\ganttbar{Backend}{2}{4} \\
+\ganttbar{Frontend}{2}{4} \\
+\ganttbar{Informe final}{5}{5}
+
+\end{ganttchart}
+}
+
+\caption{Desarrollo de la aplicación y cierre del proyecto}
+\end{figure}
 
 % ============================================================
 % 16. RIESGOS MATERIALIZADOS Y LECCIONES APRENDIDAS
