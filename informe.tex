@@ -1454,7 +1454,61 @@ del agua y la energía.
 \newpage
 \section{Trabajos futuros}
 
-Texto (sección opcional).
+El trabajo deja varias líneas abiertas, tanto del lado del modelo como de la aplicación.
+
+\subsection{Física embebida (PINN de balance de materiales)}
+
+La experimentación mostró que ningún modelo generaliza bien a un campo cuyo régimen no vio
+durante el entrenamiento, como pasó con SPE9, que cruza el punto de burbuja y libera gas.
+Una salida es dejar de aprender todo desde los datos y meter la física adentro del modelo.
+La ecuación de balance de materiales describe cómo cae la presión a medida que se produce e
+inyecta fluido; usada como esqueleto del modelo, es ella la que carga con la extrapolación
+a un campo nuevo.
+
+Las exploraciones preliminares en esta dirección son alentadoras: una versión basada en un
+modelo de tanque, con un solo parámetro físico ajustable, generaliza a un campo no visto
+donde los modelos puramente data-driven daban $R^2$ negativo. Sumar el término de gas libre
+($B_g$) ayuda además en el régimen que cruza el punto de burbuja. El paso siguiente es
+desarrollar esto como un PINN completo, que combine la ecuación física con una corrección
+aprendida, y evaluarlo bajo el mismo protocolo \textit{leave-one-field-out}. Esta línea
+también concreta el uso de PINNs que se anticipa en el estado del arte.
+
+\subsection{Calibración few-shot}
+
+Los experimentos de cobertura dejaron una observación clara: la predicción \textit{zero-shot}
+a un campo nuevo falla por el cambio de dominio, pero alcanza con muy pocos datos del campo
+nuevo para corregirlo. Agregar una sola simulación del campo objetivo al entrenamiento lleva
+el $R^2$ de alrededor de 0,14 a 0,89.
+
+En lugar de perseguir una generalización \textit{zero-shot} perfecta, conviene diseñar un
+flujo de calibración: ante un yacimiento nuevo, conseguir un puñado de simulaciones (o algo
+de datos reales) y reajustar el modelo. Queda por cuantificar cuántas corridas hacen falta
+para alcanzar una precisión objetivo. La implicancia práctica es que baja la barrera de
+datos para usar la herramienta en un campo que no estaba representado.
+
+\subsection{Más campos y datos reales}
+
+El trabajo se apoyó en tres campos sintéticos: Volve, Norne y SPE9. Ampliar ese conjunto,
+sobre todo con datos reales de producción y presión de la industria, permitiría un
+\textit{leave-one-field-out} más exigente y, sobre todo, comprobar si las conclusiones
+obtenidas con datos sintéticos se sostienen frente a datos de campo.
+
+\subsection{Validación contra métodos físicos (PTA/EBM)}
+
+La propuesta inicial planteaba contrastar las predicciones del modelo con las técnicas
+clásicas de la ingeniería de reservorios: el Análisis de Transientes de Presión (PTA) y la
+Ecuación de Balance de Materiales (EBM). Esa comparación quedó pendiente. Hacerla ubicaría
+al enfoque de machine learning respecto de las herramientas ya establecidas y serviría para
+chequear la consistencia física de las estimaciones.
+
+\subsection{Mejoras en la aplicación web}
+
+El modelo que sirve hoy la aplicación usa un encoder que comprime la tabla PVT junto con
+features de superficie. Una mejora natural es migrar esas features a balance de materiales
+(voidage neto), que son más físicas y transfieren mejor entre campos. También conviene
+mostrar la incertidumbre de la predicción como media y desvío sobre varias semillas, en
+lugar de una corrida única, y avanzar hacia un despliegue, ya que por ahora la aplicación
+corre solo en entorno local.
 
 % ============================================================
 % 19. CONCLUSIONES
