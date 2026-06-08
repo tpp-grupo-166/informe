@@ -670,8 +670,6 @@ Se deberá explicar cómo y en qué grado se cumplieron las pautas siguientes:
 \newpage
 \section{Herramientas externas utilizadas}
 
-\subsection*{Modelo de Machine Learning}
-
 \subsection*{Aplicación Web}
 
 Para el desarrollo de la aplicación web se utilizaron diversas herramientas y tecnologías, tanto para el backend como 
@@ -680,9 +678,6 @@ para el frontend y el despliegue del sistema:
 \begin{itemize}
 \item \textbf{FastAPI}: framework web en Python utilizado para la construcción de la API REST, permitiendo un desarrollo rápido y 
 eficiente de endpoints.
-
-\item \textbf{PyTorch}: biblioteca de machine learning empleada para la definición, entrenamiento y ejecución del modelo predictivo 
-de presión.
 
 \item \textbf{NumPy y Pandas}: utilizadas para la manipulación y procesamiento de datos, especialmente en la carga y transformación 
 de archivos CSV.
@@ -709,6 +704,44 @@ análisis de variables.
 
 Estas herramientas permitieron construir una solución robusta, escalable y mantenible, integrando tanto capacidades de procesamiento 
 de datos como visualización e interacción con el usuario.
+
+\subsection*{Modelo de Machine Learning}
+
+Para el desarrollo del modelo de machine learning se utilizaron distintas herramientas y librerías,
+tanto para el procesamiento de los datos como para el entrenamiento, evaluación y visualización
+de los resultados:
+
+\begin{itemize}
+\item \textbf{Python}: lenguaje principal utilizado para el entrenamiento y evaluación de los modelos, \\
+  en conjunto con las siguientes librerías:
+  \begin{itemize}
+    \item \textbf{PyTorch}: para el entrenamiento y evaluación del modelo LSTM.
+    
+    \item \textbf{scikit-learn}: para el entrenamiento y evaluación de los modelos de \\
+    regresión, random forest, y XGBoost.
+    
+    \item \textbf{NumPy y Pandas}: utilizadas para la manipulación y procesamiento de los
+    datasets en formato CSV.
+    
+    \item \textbf{Matplotlib}: utilizada crear visualizaciones, tanto para el análisis exploratorio
+    como para los resultados de los distintos modelos.
+
+    \item \textbf{resdata}: librería de Python utilizada para parsear los archivos de salida
+    de OPM Flow y generar el dataset sintético.
+  \end{itemize}
+
+\item \textbf{Google Colab}: entorno de ejecución utilizado para correr los notebooks de
+entrenamiento y evaluación.
+
+\item \textbf{Jupyter notebooks}: utilizados para ejecutar los notebooks de
+forma automatizada y reproducible.
+
+\item \textbf{OPM Flow}: simulador open source de flujo en medios porosos utilizado para
+generar el dataset sintético a partir de los modelos de reservorio en formato ECLIPSE.
+
+\item \textbf{Docker}: utilizado para correr OPM Flow en contenedores independientes y
+paralelizar la generación del dataset sin conflictos entre simulaciones concurrentes.
+\end{itemize}
 
 % ============================================================
 % 14. EXPERIMENTACIÓN Y/O VALIDACIÓN
