@@ -283,8 +283,8 @@ mecanismos de validación del sistema.
 \section{Estado del Arte}
 
 Antes de la llegada del análisis de datos a gran escala, la ingeniería de yacimientos se basaba en dos
-pilares metodológicos: el Análisis de Transientes de Presión (PTA por sus siglas en inglés) y la Ecuación
-de Balance de Materiales (EBM).
+pilares metodológicos: el Análisis de Transientes de Presión (PTA por sus siglas en inglés)~\cite{pta} y la
+Ecuación de Balance de Materiales (EBM)~\cite{mbe}.
 
 El PTA es un enfoque dinámico que analiza la respuesta de la presión ante perturbaciones en el pozo.
 Incluye pruebas como drawdown y buildup, que permiten calcular parámetros locales como la permeabilidad
@@ -524,9 +524,9 @@ reales con el esquema que necesitamos (presión del reservorio en función de va
 y propiedades del fluido, a lo largo del tiempo) es difícil sin una colaboración directa con una empresa petrolera,
 ya que se trata de información sensible que las operadoras manejan bajo confidencialidad.
 
-Para generar los datos sintéticos utilizamos el simulador OPM Flow, junto con una herramienta que desarrollamos
+Para generar los datos sintéticos utilizamos el simulador OPM Flow~\cite{opmflow}, junto con una herramienta que desarrollamos
 en Python para poder extraer los datos que necesitamos.
-El simulador OPM Flow toma como input un modelo de reservorio definido en el formato ECLIPSE, que contiene toda la descripción física del
+El simulador OPM Flow toma como input un modelo de reservorio definido en el formato ECLIPSE~\cite{eclipse}, que contiene toda la descripción física del
 campo: la geometría del reservorio, las propiedades de la roca, la tabla PVT del fluido, la
 configuración de los pozos y el cronograma operativo de producción e inyección. A partir de esa
 entrada, OPM Flow simula el proceso productivo paso a paso en el tiempo y genera archivos
@@ -534,7 +534,7 @@ con el historial completo del estado del reservorio, capturando variables como l
 los caudales de producción e inyección, las saturaciones de cada fase y demás propiedades por celda.
 
 En concreto, utilizamos dos modelos de reservorios que representan campos reales del Mar del Norte y del
-Mar de Noruega: \textbf{Norne} y \textbf{Volve}. 
+Mar de Noruega: \textbf{Norne}~\cite{norne} y \textbf{Volve}~\cite{volve}.
 Decidimos utilizar estos modelos ya que se trata de yacimientos genuinos que estuvieron en producción durante años,
 operados originalmente por la petrolera noruega Equinor. Además, son dos de los benchmarks más populares en la 
 industria y la academia. La mayoría de los otros modelos públicos disponibles son reservorios teóricos
@@ -629,7 +629,7 @@ entre las columnas originales del dataset:
     \item \textbf{Water cut acumulado}: porcentaje del total de líquidos
     producidos que es agua.
 
-    \item \textbf{Voidage replacement ratio simplificado}: relación entre el
+    \item \textbf{Voidage replacement ratio simplificado}~\cite{vrr}: relación entre el
     volumen total inyectado y el volumen total producido. Indica si la inyección de agua compensa la
     extracción y si se está logrando mantener la presión del reservorio.
   \end{itemize}
@@ -784,7 +784,7 @@ de los resultados:
     \item \textbf{Matplotlib}: utilizada crear visualizaciones, tanto para el análisis exploratorio
     como para los resultados de los distintos modelos.
 
-    \item \textbf{resdata}: librería de Python utilizada para parsear los archivos de salida
+    \item \textbf{resdata}~\cite{resdata}: librería de Python utilizada para parsear los archivos de salida
     de OPM Flow y generar el dataset sintético.
   \end{itemize}
 
@@ -1106,7 +1106,7 @@ resulta ser el anclaje a $P_{init}$ y la cobertura de dominio, más que la famil
 
 La comparación anterior entrena con un único campo (Norne) y evalúa la transferencia a un
 segundo campo (Volve). Para poner a prueba la generalización de forma más exigente,
-realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}, y
+realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}~\cite{spe9}, y
 adopta un protocolo de \textit{leave-one-field-out}: para cada campo objetivo, el modelo se
 entrena con los otros dos campos completos y predice el campo que nunca vio.
 
@@ -1374,7 +1374,7 @@ directamente en la planificación inicial y retrasó el avance del proyecto, par
 las etapas de experimentación y modelado.
 
 Se analizaron fuentes de datos públicas, como la información disponible en el
-Capítulo IV de la Secretaría de Energía de la República Argentina. No obstante, estas fuentes no
+Capítulo IV de la Secretaría de Energía de la República Argentina~\cite{seenergia}. No obstante, estas fuentes no
 incluyen datos de presión de reservorios, lo que limitó su utilidad para el problema abordado y
 reforzó la dependencia de datos privados de la industria.
 
@@ -1559,6 +1559,36 @@ Texto.
   Networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial
   differential equations}. Journal of Computational Physics, 378, 686-707.
   \url{https://www.sciencedirect.com/science/article/abs/pii/S0021999118307125}
+
+  \bibitem{opmflow} Open Porous Media (OPM) Initiative. \textit{OPM Flow --- simulador de reservorios open
+  source}. \url{https://opm-project.org/}
+
+  \bibitem{eclipse} SLB (Schlumberger). \textit{ECLIPSE --- formato y simulador de referencia de
+  reservorios}. \url{https://www.software.slb.com/products/eclipse}
+
+  \bibitem{volve} Equinor. \textit{Volve field data set} (datos abiertos del campo Volve).
+  \url{https://www.equinor.com/energy/volve-data-sharing}
+
+  \bibitem{norne} Open Porous Media (OPM). \textit{Norne benchmark case} (repositorio \texttt{opm-tests}).
+  \url{https://github.com/OPM/opm-tests/tree/master/norne}
+
+  \bibitem{spe9} Society of Petroleum Engineers. \textit{SPE Comparative Solution Project} (modelo benchmark
+  SPE9). \url{https://www.spe.org/web/csp/}
+
+  \bibitem{resdata} Equinor. \textit{resdata --- librería para leer los archivos de salida del simulador
+  ECLIPSE / OPM Flow}. \url{https://github.com/equinor/resdata}
+
+  \bibitem{seenergia} Secretaría de Energía, República Argentina. \textit{Portal de Datos Abiertos de
+  Energía}. \url{http://datos.energia.gob.ar/}
+
+  \bibitem{mbe} PetroWiki (SPE). \textit{Material balance in oil reservoirs}.
+  \url{https://petrowiki.spe.org/Material_balance_in_oil_reservoirs}
+
+  \bibitem{pta} PetroWiki (SPE). \textit{Pressure transient testing}.
+  \url{https://petrowiki.spe.org/Pressure_transient_testing}
+
+  \bibitem{vrr} PetroWiki (SPE). \textit{Voidage replacement ratio}.
+  \url{https://petrowiki.spe.org/Voidage_replacement_ratio}
 \end{thebibliography}
 
 % ============================================================
