@@ -811,10 +811,7 @@ Para definir la calidad de los modelos, nos basamos en las siguientes métricas:
 \begin{itemize}
   \item \textbf{R² (coeficiente de determinación)}: mide qué fracción de la varianza del target explica el modelo.
   \item \textbf{MAE (Mean Absolute Error)}: el error promedio absoluto en la misma unidad física que la presión del reservorio (psi).
-  \item \textbf{RMSE (Root Mean Squared Error)}: la raíz del error cuadrático medio, también en psi. Penaliza con más
-  fuerza los timesteps con errores grandes, así que al compararlo con el MAE da una idea de cuán "concentrados" están los
-  errores: si RMSE y MAE son parecidos, el error es uniforme; si el RMSE es mucho mayor, hay timesteps puntuales con
-  desvíos importantes.
+  \item \textbf{RMSE (Root Mean Squared Error)}: la raíz del error cuadrático medio, en psi.
 \end{itemize}
 
 \subsection{Evaluación y análisis comparativo de los modelos de machine learning}
@@ -870,11 +867,9 @@ sino establecer una cota inferior empírica contra la cual comparar los modelos 
 \label{fig:baseline-volve-parity}
 \end{figure}
 
-El modelo se ajusta razonablemente bien a Norne (R² = 0.959, MAE de 35 psi), pero el R² sobre
-Volve es de $-891.87$ y el MAE supera los 8000 psi. La regresión lineal aprende relaciones
-calibradas a los rangos específicos de las features de Norne; cuando esas features toman valores
-fuera de ese rango calibrado (como pasa en Volve), el modelo extrapola linealmente y produce
-predicciones absurdas, muy lejos del rango físico real de la presión.
+A partir de los valores del coeficiente de determinación ($0.959$ para Norne, $-891.87$ para Volve), 
+se puede deducir que claramente el modelo overfittea para los datos de entrenamiento, y no logra
+extrapolar la predicción para reservorios con una distribución distinta a la de Norne.
 
 
 \subsubsection{Random Forest}
@@ -928,11 +923,7 @@ Volve (cross-reservoir) & 0.755 & 101.69 & 135.32 \\
 Random Forest mejora al baseline tanto in-distribution como cross-reservoir. Sobre Norne el R² sube
 de 0.96 a 0.99 y el MAE baja de 35 a 19 psi. El cambio más notorio está sobre Volve: a diferencia
 del baseline lineal, que extrapola fuera de rango, Random Forest logra un R² de 0.755 con un MAE
-de 101.69 psi y RMSE de 135.32 psi. La diferencia entre MAE y RMSE en Volve es moderada (factor
-1.3), lo que indica que los errores están distribuidos de manera relativamente uniforme y no
-concentrados en pocos timesteps. Estos valores se mantienen al nivel del LSTM, mostrando que un
-modelo de árboles puede generalizar entre reservorios sin necesidad de modelar la dinámica temporal
-explícitamente, siempre y cuando el target esté normalizado respecto de la presión inicial.
+de 101.69 psi y RMSE de 135.32 psi.
 
 \subsubsection{XGBoost}
 
@@ -985,17 +976,13 @@ Volve (cross-reservoir) & 0.082 & 183.51 & 262.04 \\
 XGBoost obtiene la mejor performance in-distribution sobre Norne de todos los modelos
 probados: R² = 0.991 y MAE de apenas 17 psi. Sin embargo, sobre Volve queda muy por detrás
 de Random Forest: el R² es apenas positivo (0.082), el MAE supera los 180 psi y el RMSE
-los 260 psi. La razón RMSE/MAE de 1.43 indica además que hay timesteps con error muy
-grande arrastrando la métrica. La mayor capacidad expresiva del modelo le permite ajustar
-con más finura la distribución particular de Norne, pero a costa de transferir peor cuando
-el campo cambia.
+los 260 psi.
 
 
 \subsubsection{Support Vector Regression (SVR)}
 
-Como último modelo clásico probamos un Support Vector Regression con kernel RBF, una familia
-distinta a las anteriores (basada en kernels en lugar de lineal o de árboles). La motivación
-era completar el panorama metodológico con un modelo no lineal y no basado en árboles.
+Como último modelo probamos un Support Vector Regression con kernel RBF, una familia
+distinta a las anteriores (basada en kernels en lugar de lineal o de árboles).
 
 \begin{table}[ht]
 \centering
@@ -1041,12 +1028,8 @@ Volve (cross-reservoir) & 0.052 & 237.78 & 266.20 \\
 \end{figure}
 
 SVR alcanza buenas métricas in-distribution sobre Norne (R² 0.986, MAE 22 psi), comparables a las
-de Random Forest y XGBoost. Sin embargo, sobre Volve queda relegado al fondo de la tabla entre
-los modelos que sí logran transferir: el R² es de apenas 0.052 y el MAE supera los 237 psi. El
-kernel RBF es sensible a la geometría del espacio de features, y cuando los puntos de Volve caen
-fuera de la región cubierta por Norne durante el entrenamiento, las predicciones tienden a la
-media del training set.
-
+de Random Forest y XGBoost. Sin embargo, no es capaz de transferir estos valores a la predicción
+de Volve, ya que el R² es de apenas 0.052 y el MAE supera los 237 psi.
 
 \subsubsection{LSTM}
 
@@ -1104,13 +1087,6 @@ un MAE de 101.9 psi y RMSE de 140 psi, valores prácticamente equivalentes a los
 Forest. Esto muestra que el LSTM es, junto con Random Forest, uno de los dos modelos que logra
 transferir entre reservorios bajo este protocolo.
 
-La ventaja diferencial del LSTM no aparece en las métricas brutas del experimento (es decir,
-no supera a Random Forest), sino en cómo modela el problema: consume las features como secuencia
-temporal y mantiene un encoder dedicado para las propiedades termodinámicas del fluido. Esto le
-da más capacidad de adaptarse a escenarios más complejos que el actual (por ejemplo, mayor
-cantidad de palancas operativas o reservorios con regímenes más distintos), aunque en este
-experimento puntual esa capacidad extra no se traduzca en mejor métrica.
-
 \subsubsection{Comparación final entre modelos}
 
 Los gráficos \ref{fig:comparacion-mae} y \ref{fig:comparacion-r2} comparan visualmente las
@@ -1139,20 +1115,11 @@ para no ofuscar al resto de la escala.
 \label{fig:comparacion-r2}
 \end{figure}
 
-De los gráficos se desprenden tres observaciones. Primero, sobre Norne casi todos los modelos
-alcanzan R² mayor a 0.98 y MAE menor a 25 psi (excepto el LSTM, levemente atrás, y Ridge un
-escalón por debajo); in-distribution la elección de modelo no es crítica. Segundo, sobre Volve
-los modelos se separan claramente en tres grupos: Random Forest y LSTM logran R² alrededor de
-0.74 con MAE cercano a 100 psi, XGBoost y SVR alcanzan R² apenas positivos, y Ridge colapsa
-con R² fuertemente negativo. Tercero, no hay un único ganador entre Random Forest y LSTM:
-ambos tienen métricas casi idénticas en los tres indicadores sobre Volve.
-
-La conclusión central del experimento es que la transferencia entre reservorios no depende
-tanto de la familia de modelo elegida sino de cómo se plantee el problema. La normalización del
-target respecto de $P_{init}$ es el ingrediente que permite que modelos sin dependencia temporal
-explícita, como Random Forest, logren generalizar a un campo no visto. La sección
-\ref{sec:lofo} profundiza esta validación incorporando un tercer reservorio y un protocolo
-\textit{leave-one-field-out} más exigente.
+A partir de los gráficos se ve con claridad lo que ya habíamos observado en los análisis
+individuales de cada modelo: bajo este protocolo, Random Forest y LSTM logran generalizar al
+reservorio no visto. Los demás modelos alcanzan métricas muy buenas in-distribution sobre
+Norne pero colapsan al evaluar sobre Volve, mientras que Random Forest y LSTM mantienen un R² positivo y
+un MAE varios órdenes de magnitud menor en el split cross-reservoir.
 
 \subsection{Validación de generalización multi-campo (leave-one-field-out)}
 \label{sec:lofo}
