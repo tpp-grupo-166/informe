@@ -15,6 +15,13 @@
 \usepackage{float}
 \usepackage{pgfgantt}
 \usepackage{array}
+\usepackage{etoolbox}
+
+% Hacer que la sección de Referencias quede numerada.
+% Por defecto, thebibliography la emite con \section* (sin número).
+\makeatletter
+\patchcmd{\thebibliography}{\section*{\refname}}{\section{\refname}}{}{}
+\makeatother
 
 
 % ====== INTERLINEADO 1,5 ======
