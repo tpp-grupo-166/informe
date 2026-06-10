@@ -1101,15 +1101,18 @@ entrena con los otros dos campos completos y predice el campo que nunca vio.
 
 Los tres campos utilizados son Volve (10 simulaciones), Norne (30) y SPE9 (100). Para que
 la comparación entre familias de modelo sea justa, los tres reciben exactamente la misma
-entrada: el mismo conjunto de features adimensionales (normalizadas por el pore-volume, sin
-lags del target y descartando $B_o$, $B_g$ y $R_s$ por su dependencia directa de la
+entrada: el mismo conjunto de features adimensionales, construido únicamente con
+producción, inyección y propiedades estáticas (normalizadas por el pore-volume, sin
+ninguna variable derivada de la serie de presión, ni lags ni derivadas, y descartando
+$B_o$, $B_g$ y $R_s$ por su dependencia directa de la
 presión), y el mismo objetivo anclado a la presión inicial ($\Delta = P - P_{init}$, del que
 se reconstruye $P = P_{init} + \widehat{\Delta}$). Anclar a $P_{init}$ es lo que permite
 comparar campos con niveles de presión distintos: sin este anclaje, los tres modelos arrojan
 $R^2$ negativo en todos los campos.
 
 Se comparan tres familias: Ridge (lineal regularizado), XGBoost (árboles con boosting) y
-LSTM (red recurrente). Cabe aclarar que el LSTM evaluado en este experimento es una versión
+LSTM (red recurrente). El LSTM se entrena con tres semillas de inicialización y se reporta
+media $\pm$ desvío. Cabe aclarar que el LSTM evaluado en este experimento es una versión
 genérica sobre las mismas features, que no incorpora el encoder de PVT descrito
 anteriormente; por lo tanto, sus métricas aquí constituyen una cota inferior de su
 rendimiento real.
@@ -1120,53 +1123,59 @@ rendimiento real.
 \hline
 \textbf{Campo objetivo (R² zero-shot)} & \textbf{Ridge} & \textbf{XGBoost} & \textbf{LSTM} \\
 \hline
-Volve & -0.68 & +0.69 & +0.53 \\
+Volve & -6.70 & +0.63 & +0.54 $\pm$ 0.04 \\
 \hline
-Norne & +0.80 & +0.23 & +0.72 \\
+Norne & -42.40 & +0.27 & +0.05 $\pm$ 0.25 \\
 \hline
-SPE9  & +0.38 & -1.21 & -0.86 \\
+SPE9  & -0.54 & -1.85 & -1.91 $\pm$ 0.21 \\
 \hline
-R² medio & +0.17 & -0.10 & +0.13 \\
+R² medio & -16.55 & -0.32 & -0.44 \\
 \hline
-R² mediano por simulación & -0.16 & -0.33 & -0.05 \\
+R² mediano por simulación & -19.45 & -0.62 & -0.75 \\
 \hline
 \end{tabular}
 \caption{Generalización entre campos (leave-one-field-out). Cada fila es un campo no visto
 durante el entrenamiento. El $R^2$ mediano por simulación es más exigente: obliga a seguir la
-trayectoria de cada corrida, no sólo el nivel promedio del campo.}
+trayectoria de cada corrida, no sólo el nivel promedio del campo. La columna LSTM reporta
+media $\pm$ desvío sobre tres semillas de inicialización.}
 \label{tab:lofo}
 \end{table}
 
 De este experimento se desprenden varias observaciones:
 
 \begin{itemize}
-  \item \textbf{No hay un ganador único entre familias de modelo.} Cada modelo gana en un
-  campo distinto: XGBoost transfiere mejor a Volve ($R^2 = 0.69$) y Ridge a Norne
-  ($R^2 = 0.80$). A diferencia de lo observado en el experimento anterior, los modelos de
-  árboles \textit{sí} logran transferir a un campo no visto cuando reciben el target anclado
-  a $P_{init}$.
+  \item \textbf{XGBoost es el más estable y el único con transferencia parcial.} Queda en
+  positivo en los dos campos de régimen parecido al de entrenamiento (Volve $+0.63$, Norne
+  $+0.27$), aunque con un $R^2$ mediano por simulación modesto en Norne ($+0.16$): acompaña
+  el nivel de presión más que la trayectoria fina. A diferencia de lo observado en el
+  experimento anterior, los modelos de árboles \textit{sí} logran transferir parcialmente a
+  un campo no visto cuando reciben el target anclado a $P_{init}$.
 
-  \item \textbf{El LSTM es el más robusto.} Es el único positivo en Volve y Norne a la vez y
-  obtiene el mejor $R^2$ mediano por simulación; no se desploma como XGBoost en el campo más
-  difícil. El costo es un entrenamiento sensiblemente más lento.
+  \item \textbf{El LSTM conserva la transferencia en Volve.} Su resultado en Volve es
+  genuino y parejo entre semillas ($+0.54 \pm 0.04$); en Norne, en cambio, la media queda en
+  cero con un desvío grande entre semillas (de $-0.27$ a $+0.33$). Una corrida única podía
+  dar un resultado bueno o malo por azar de la inicialización; por eso se reporta media
+  $\pm$ desvío.
 
-  \item \textbf{XGBoost es el más volátil.} Su mayor capacidad le da el mejor resultado en
-  Volve pero el peor en SPE9 ($-1.21$): cuando el campo nuevo es muy distinto, sobreajusta y
-  extrapola mal.
+  \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola sin freno
+  fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne. Es
+  la contracara del comportamiento de los árboles: estos fallan por no extrapolar, lo
+  lineal por extrapolar de más.
 
-  \item \textbf{Ningún modelo resuelve SPE9.} Es el campo más distinto de los tres ---su
-  presión cruza el punto de burbuja y libera gas, un régimen ausente en el entrenamiento--- y
-  los tres modelos dan un $R^2$ pobre o negativo. El $+0.38$ de Ridge es engañoso: su $R^2$
-  por simulación es prácticamente nulo, es decir, acierta el nivel promedio entre
-  simulaciones pero no la trayectoria real.
+  \item \textbf{Ningún modelo resuelve SPE9.} Es el campo más distinto de los tres (su
+  presión cruza el punto de burbuja y libera gas, un régimen ausente en el entrenamiento) y
+  los tres modelos dan un $R^2$ negativo, tanto global como por simulación. La física que
+  no está en los datos de entrenamiento no se interpola.
 \end{itemize}
 
 La conclusión central de este experimento es que el factor que determina la transferencia no
 es tanto la familia de modelo (Ridge vs. XGBoost vs. LSTM) sino dos elementos metodológicos:
 \textbf{anclar la predicción a $P_{init}$} y \textbf{contar con cobertura de dominio}, esto
-es, que el entrenamiento incluya algún campo parecido al campo objetivo. Los modelos
-transfieren bien cuando el campo nuevo se asemeja a los de entrenamiento (Volve, Norne) y
-fallan cuando pertenece a un régimen que nunca vieron (SPE9, que cruza el punto de burbuja).
+es, que el entrenamiento incluya algún campo de régimen parecido al campo objetivo. Aun
+así, la transferencia es parcial: solo XGBoost queda en positivo en los dos campos de
+régimen parecido (Volve, Norne), y ningún modelo transfiere a un régimen que nunca vio
+(SPE9, que cruza el punto de burbuja). Sin información del campo objetivo, ningún modelo
+puramente \textit{data-driven} generaliza de verdad.
 
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
@@ -1526,9 +1535,11 @@ Frente a ese problema, encontramos que los factores que determinan la transferen
 campos son metodológicos antes que algorítmicos. Anclar la predicción a la presión
 inicial del reservorio y normalizar las cantidades por el volumen poral importó más que
 la elección entre Ridge, XGBoost o LSTM. Con el target anclado, hasta los modelos de
-árboles transfieren a un campo no visto; sin el anclaje, ninguna familia lo logra. A
-igual representación, ningún modelo domina en todos los campos. El LSTM se destacó por su
-robustez pareja entre campos, y por eso es el que sirve la aplicación web.
+árboles transfieren parcialmente a un campo no visto; sin el anclaje, ninguna familia lo
+logra. A igual representación, ningún modelo transfiere de verdad a los tres campos:
+XGBoost resultó el más estable, y el LSTM conservó la mejor parte de su transferencia en
+Volve. La aplicación web sirve el modelo LSTM de la línea secuencial con codificación de
+PVT, desarrollado en la experimentación con Norne y Volve.
 
 El experimento \textit{leave-one-field-out} marcó además el límite del enfoque puramente
 \textit{data-driven}: ningún modelo extrapola a un régimen termodinámico que no vio
