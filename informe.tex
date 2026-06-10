@@ -1505,7 +1505,57 @@ corre solo en entorno local.
 \newpage
 \section{Conclusiones}
 
-Texto.
+El objetivo planteado en la propuesta era construir un sistema basado en machine
+learning para estimar la presión de un reservorio, pensado para ingenieros sin formación
+en ciencia de datos. Ese objetivo se cumplió. El trabajo produjo el pipeline completo,
+desde la generación de datos sintéticos con OPM Flow (40 simulaciones de Volve y Norne,
+más SPE9 para la validación multi-campo), pasando por las \textit{features}
+adimensionales basadas en el balance de materiales y la comparación de cuatro familias de
+modelos, hasta la aplicación web que sirve las predicciones y explica cómo se procesaron
+los datos. Todos los componentes funcionan integrados.
+
+La conclusión técnica más importante no estaba en la propuesta original, sino que surgió
+durante la experimentación. Predecir la presión del campo con el que el modelo fue
+entrenado es un problema prácticamente resuelto: las cuatro familias evaluadas superan un
+$R^2$ de 0.9 \textit{in-distribution}. El desafío real es generalizar entre reservorios.
+El mismo modelo que alcanza un $R^2$ de 0.99 sobre Norne puede dar predicciones
+físicamente absurdas sobre Volve. Este \textit{domain shift} es lo que define la
+dificultad de aplicar machine learning en este dominio.
+
+Frente a ese problema, encontramos que los factores que determinan la transferencia entre
+campos son metodológicos antes que algorítmicos. Anclar la predicción a la presión
+inicial del reservorio y normalizar las cantidades por el volumen poral importó más que
+la elección entre Ridge, XGBoost o LSTM. Con el target anclado, hasta los modelos de
+árboles transfieren a un campo no visto; sin el anclaje, ninguna familia lo logra. A
+igual representación, ningún modelo domina en todos los campos. El LSTM se destacó por su
+robustez pareja entre campos, y por eso es el que sirve la aplicación web.
+
+El experimento \textit{leave-one-field-out} marcó además el límite del enfoque puramente
+\textit{data-driven}: ningún modelo extrapola a un régimen termodinámico que no vio
+durante el entrenamiento, como pasa con SPE9, cuya presión cruza el punto de burbuja y
+libera gas. La física que no está en los datos de entrenamiento no se puede interpolar.
+Hay dos salidas: incorporarla al modelo, que es la línea de física embebida y PINNs que
+se desarrolla en Trabajos Futuros, o compensarla con datos del campo objetivo. Sobre esta
+segunda, los experimentos de cobertura indican que con muy pocas simulaciones del campo
+nuevo alcanza para recuperar el desempeño mediante calibración. El modo de uso realista
+del sistema, entonces, no es la generalización perfecta sin datos, sino calibrar con poca
+información del campo objetivo.
+
+En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
+la industria, se materializó por completo. La viabilidad del proyecto dependió de la
+capacidad de adaptación: el paso de esperar datos reales a generarlos con un simulador
+físico terminó marcando el rumbo del trabajo, y las reuniones quincenales con los
+directores permitieron detectar a tiempo los desvíos de alcance y de modelado. La lección
+que nos llevamos es que en un proyecto de datos aplicado a un dominio industrial, la
+estrategia de datos merece el mismo nivel de planificación que el modelado.
+
+Por último, corresponde delimitar el alcance de estas conclusiones. Todos los resultados
+se obtuvieron sobre datos simulados. La transferencia a datos de campo reales no fue
+demostrada y es la validación pendiente más importante, junto con el contraste contra los
+métodos físicos tradicionales (PTA y EBM), que estaba comprometido en la propuesta y
+quedó fuera de esta etapa. Dentro de esos límites, el trabajo deja un sistema funcional,
+una idea clara de dónde aporta el machine learning y dónde necesita de la física, y una
+dirección de continuación concreta.
 
 % ============================================================
 % 20. APORTES INDIVIDUALES
