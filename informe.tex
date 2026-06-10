@@ -13,6 +13,9 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{float}
+\usepackage{pgfgantt}
+\usepackage{array}
+
 
 % ====== INTERLINEADO 1,5 ======
 \onehalfspacing
@@ -175,21 +178,11 @@ reservorios, presentan limitaciones frente al creciente volumen y complejidad de
 En este contexto, surge la necesidad de explorar nuevas herramientas que permitan realizar predicciones
 rápidas, robustas y escalables.
 
-Este proyecto propone el desarrollo de un sistema basado en técnicas de \textit{Data Analytics} y
-\textit{Machine Learning}, orientado a la estimación de la presión de yacimientos. La solución integra un
-módulo de predicción que consume y procesa datos físicos del reservorio, entrenando modelos de regresión y
-aprendizaje profundo, junto con una interfaz web que facilita su uso por parte de ingenieros sin formación
-específica en ciencia de datos.
+Este proyecto consiste en el desarrollo de un sistema para estimar la presión de yacimientos de petróleo,
+basado en técnicas de \textit{Data Analytics} y \textit{Machine Learning}.
+La solución integra un modelo predictivo que consume y procesa datos físicos del reservorio, junto con una interfaz web que 
+facilita su uso por parte de ingenieros sin formación específica en ciencia de datos.
 
-La metodología incluye el preprocesamiento y limpieza de datos, el diseño de \textit{features}, la
-comparación de distintos algoritmos (como Random Forest, XGBoost, LSTM y PINNs) y la validación mediante
-métricas estándar de regresión, pruebas cruzadas y contrastes con metodologías convencionales (PTA, EBM).
-Asimismo, el proyecto sigue un enfoque ágil, con entregables iterativos y validación continua para
-garantizar la utilidad y confiabilidad del sistema.
-
-El impacto esperado de esta propuesta radica en la optimización de la producción, la reducción de riesgos
-operativos y ambientales, y la provisión de una herramienta transparente y escalable que contribuya a la
-toma de decisiones en la industria energética.
 
 % ============================================================
 % 4. PALABRAS CLAVE
@@ -210,19 +203,9 @@ production. Traditional methods, based on reservoir physics, present limitations
 increasing volume and complexity of modern data. In this context, new approaches are required to provide
 fast, robust, and scalable predictions.
 
-This project proposes the development of a system based on \textit{Data Analytics} and \textit{Machine
-Learning} techniques for reservoir pressure estimation. The solution integrates a prediction module that
-processes reservoir data and trains regression and deep learning models, along with a web interface
-designed for engineers without data science expertise.
-
-The methodology includes data preprocessing and cleaning, feature engineering, evaluation of various
-algorithms (such as Random Forest, XGBoost, LSTM, and PINNs), and validation through standard regression
-metrics, cross-validation, and comparisons with conventional methods (PTA, EBM). The project follows an
-agile approach with iterative deliverables and continuous validation to ensure the system's utility and
-reliability.
-
-The expected impact lies in production optimization, reduction of operational and environmental risks, and
-the delivery of a transparent and scalable tool that supports decision-making in the energy industry.
+This project consists on the development of a system to estimate the pressure of oil resservoirs, 
+based on \textit{Data Analytics} and \textit{Machine Learning} techniques for reservoir pressure estimation.
+The solution integrates a predictive model that processes reservoir data, along with a web interface designed for engineers without data science expertise.
 
 % ============================================================
 % 6. KEYWORDS
@@ -282,8 +265,8 @@ mecanismos de validación del sistema.
 \section{Estado del Arte}
 
 Antes de la llegada del análisis de datos a gran escala, la ingeniería de yacimientos se basaba en dos
-pilares metodológicos: el Análisis de Transientes de Presión (PTA por sus siglas en inglés) y la Ecuación
-de Balance de Materiales (EBM).
+pilares metodológicos: el Análisis de Transientes de Presión (PTA por sus siglas en inglés)~\cite{pta} y la
+Ecuación de Balance de Materiales (EBM)~\cite{mbe}.
 
 El PTA es un enfoque dinámico que analiza la respuesta de la presión ante perturbaciones en el pozo.
 Incluye pruebas como drawdown y buildup, que permiten calcular parámetros locales como la permeabilidad
@@ -523,9 +506,9 @@ reales con el esquema que necesitamos (presión del reservorio en función de va
 y propiedades del fluido, a lo largo del tiempo) es difícil sin una colaboración directa con una empresa petrolera,
 ya que se trata de información sensible que las operadoras manejan bajo confidencialidad.
 
-Para generar los datos sintéticos utilizamos el simulador OPM Flow, junto con una herramienta que desarrollamos
+Para generar los datos sintéticos utilizamos el simulador OPM Flow~\cite{opmflow}, junto con una herramienta que desarrollamos
 en Python para poder extraer los datos que necesitamos.
-El simulador OPM Flow toma como input un modelo de reservorio definido en el formato ECLIPSE, que contiene toda la descripción física del
+El simulador OPM Flow toma como input un modelo de reservorio definido en el formato ECLIPSE~\cite{eclipse}, que contiene toda la descripción física del
 campo: la geometría del reservorio, las propiedades de la roca, la tabla PVT del fluido, la
 configuración de los pozos y el cronograma operativo de producción e inyección. A partir de esa
 entrada, OPM Flow simula el proceso productivo paso a paso en el tiempo y genera archivos
@@ -533,7 +516,7 @@ con el historial completo del estado del reservorio, capturando variables como l
 los caudales de producción e inyección, las saturaciones de cada fase y demás propiedades por celda.
 
 En concreto, utilizamos dos modelos de reservorios que representan campos reales del Mar del Norte y del
-Mar de Noruega: \textbf{Norne} y \textbf{Volve}. 
+Mar de Noruega: \textbf{Norne}~\cite{norne} y \textbf{Volve}~\cite{volve}.
 Decidimos utilizar estos modelos ya que se trata de yacimientos genuinos que estuvieron en producción durante años,
 operados originalmente por la petrolera noruega Equinor. Además, son dos de los benchmarks más populares en la 
 industria y la academia. La mayoría de los otros modelos públicos disponibles son reservorios teóricos
@@ -628,7 +611,7 @@ entre las columnas originales del dataset:
     \item \textbf{Water cut acumulado}: porcentaje del total de líquidos
     producidos que es agua.
 
-    \item \textbf{Voidage replacement ratio simplificado}: relación entre el
+    \item \textbf{Voidage replacement ratio simplificado}~\cite{vrr}: relación entre el
     volumen total inyectado y el volumen total producido. Indica si la inyección de agua compensa la
     extracción y si se está logrando mantener la presión del reservorio.
   \end{itemize}
@@ -648,21 +631,78 @@ del fluido influya en la predicción sin opacar a las variables que cambian con 
 \newpage
 \section{Metodología aplicada}
 
-Se deberá explicar cómo y en qué grado se cumplieron las pautas siguientes:
+El trabajo se organizó de forma incremental, en ciclos marcados por las reuniones de
+seguimiento con los directores. Cada ciclo apuntaba a un objetivo concreto y se revisaba
+con ellos antes de pasar al siguiente.
 
-\begin{itemize}
-  \item Desarrollo incremental, por iteraciones o bajo una modalidad de entrega continua. Qué entregables
-  intermedios hubo y cuál fue la cadencia de prácticas de seguimiento y mejora continua.
-  \item Grado de automatización de las tareas de desarrollo, prueba y despliegue, con indicadores.
-  \item Qué herramienta de versionado de código y de otros artefactos se utilizó.
-  \item Qué herramienta se utilizó para gestionar el proceso de desarrollo, el seguimiento de tickets y bugs, etc.
-  \item Qué artefactos se utilizaron para la gestión del alcance, riesgos, métricas de calidad del
-  producto, criticidad de bugs, indicadores de tiempos y costos, minutas y otros artefactos de gestión de
-  la comunicación con los interesados.
-  \item Cuáles fueron los criterios de aceptación de entregas y pruebas de aceptación de las
-  funcionalidades requeridas.
-  \item Qué indicadores de calidad de proceso se utilizaron.
-\end{itemize}
+\subsection{Desarrollo incremental y entregables}
+
+El desarrollo estuvo condicionado por la disponibilidad de los datos. La etapa inicial se
+dedicó a estudiar el dominio, ya que el equipo tenía poca formación previa en ingeniería
+de reservorios, y a escribir la propuesta, mientras se gestionaba el acceso a datos reales
+de presión de la industria. Esos datos nunca llegaron. Ante eso se optó por datos
+sintéticos: primero generados con modelos de lenguaje y, como no daban suficiente realismo
+físico, después con el simulador OPM Flow, que terminó siendo la fuente de datos del
+proyecto. Recién a partir de ahí el trabajo se centró en probar y comparar modelos
+(baseline lineal, Random Forest, XGBoost y LSTM), construir el MVP de la aplicación web e
+iterar su experiencia de usuario con los directores, para cerrar con este informe.
+
+Hubo tres entregas formales: la propuesta de anteproyecto, una entrega intermedia a mitad
+de proyecto (un video con el estado del trabajo) y este informe final. Entre medio, los
+avances importantes, como los datasets generados o el flujo de carga de la aplicación, se
+mostraban a los directores en reuniones específicas. El seguimiento era quincenal: ahí se
+revisaban los avances y se definían los próximos pasos.
+
+\subsection{Control de versiones}
+
+Se usó Git para versionar el código y GitHub como plataforma, con los repositorios
+agrupados en una organización del equipo. El código se separó por repositorio: uno para
+los experimentos y notebooks, otro para la aplicación web y otro para el informe en
+\LaTeX{}. Para los desarrollos grandes se trabajó con ramas y \textit{pull requests}; los
+cambios chicos iban directo a la rama principal. Antes de integrar, los cambios se
+revisaban entre pares, tanto el código de la aplicación como los notebooks. Hacia el final
+esa revisión se apoyó en el CI, que frena cualquier cambio que rompa las pruebas.
+
+\subsection{Gestión del proceso y seguimiento}
+
+Las tareas y los bugs se siguieron como \textit{issues} en GitHub, complementados con una
+lista de pendientes compartida y la coordinación diaria por mensajería. Con los directores
+y demás interesados la comunicación fue por mensajería y videollamadas.
+
+\subsection{Automatización}
+
+La aplicación web tiene un pipeline de integración continua (CI) con GitHub Actions que
+corre en cada \textit{push} y \textit{pull request}. Ejecuta los tests del backend con
+pytest, exigiendo un mínimo de cobertura, y compila el frontend chequeando tipos. Si el
+pipeline falla, el cambio no se puede integrar. No hay despliegue automático: por ahora la
+aplicación corre en entorno local.
+
+\subsection{Criterios de aceptación}
+
+Un modelo se daba por bueno cuando alcanzaba métricas razonables en las dos evaluaciones,
+\textit{in-distribution} y \textit{cross-reservoir}: un $R^2$ positivo (con 0,5 como
+referencia) y un MAE dentro del rango físico esperado. A eso se sumaba el visto bueno de
+los directores. En la aplicación web, una funcionalidad se consideraba terminada cuando
+funcionaba de extremo a extremo (carga de datos, predicción y visualización), pasaba el CI
+y se validaba en las reuniones.
+
+\subsection{Artefactos de gestión y comunicación}
+
+La comunicación con los interesados se apoyó en minutas de las reuniones, donde quedaban
+registradas las decisiones y los próximos pasos. El alcance se manejó a partir del
+documento de propuesta inicial. Los riesgos se tratan en la sección correspondiente de
+este informe.
+
+\subsection{Indicadores de calidad}
+
+La calidad del producto se midió con las métricas de los modelos ($R^2$ y MAE) y con el
+estado del CI: pruebas en verde y un mínimo de cobertura. Del lado del proceso, se siguió
+que se mantuviera la cadencia de reuniones y que cada cambio pasara por revisión antes de
+integrarse.
+
+El avance del proyecto se midió contra los hitos formales (anteproyecto, entrega
+intermedia e informe final) y por lo que se completaba en cada iteración: datasets
+generados, modelos evaluados y funcionalidades de la aplicación.
 
 % ============================================================
 % 13. HERRAMIENTAS EXTERNAS UTILIZADAS
@@ -726,7 +766,7 @@ de los resultados:
     \item \textbf{Matplotlib}: utilizada crear visualizaciones, tanto para el análisis exploratorio
     como para los resultados de los distintos modelos.
 
-    \item \textbf{resdata}: librería de Python utilizada para parsear los archivos de salida
+    \item \textbf{resdata}~\cite{resdata}: librería de Python utilizada para parsear los archivos de salida
     de OPM Flow y generar el dataset sintético.
   \end{itemize}
 
@@ -1119,7 +1159,7 @@ explícita, como Random Forest, logren generalizar a un campo no visto. La secci
 
 La comparación anterior entrena con un único campo (Norne) y evalúa la transferencia a un
 segundo campo (Volve). Para poner a prueba la generalización de forma más exigente,
-realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}, y
+realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}~\cite{spe9}, y
 adopta un protocolo de \textit{leave-one-field-out}: para cada campo objetivo, el modelo se
 entrena con los otros dos campos completos y predice el campo que nunca vio.
 
@@ -1198,43 +1238,172 @@ fallan cuando pertenece a un régimen que nunca vieron (SPE9, que cruza el punto
 \newpage
 \section{Cronograma de las actividades realizadas}
 
-El desarrollo del proyecto se llevó a cabo en dos cuatrimestres, cada uno con objetivos y 
-actividades específicas:
+El desarrollo del proyecto se llevó a cabo a lo largo de dos cuatrimestres, cada uno con objetivos y actividades 
+específicas, en línea con la dedicación y duración establecidas para la materia.
 
-\textbf{Primer cuatrimestre (18/08/2025 – 01/12/2025):}
-\begin{itemize}
-\item Estudio del dominio de la ingeniería de reservorios.
-\item Lectura y análisis de bibliografía especializada: Reservoir Engineering Handbook, fourth edition.
-\item Identificación de variables relevantes y comprensión de sus relaciones.
-\item Elaboración y entrega del informe intermedio.
-\end{itemize}
+La planificación contempló una dedicación aproximada de 12 horas semanales por estudiante durante 32 semanas, 
+alcanzando un total estimado de 384 horas de trabajo. Esta organización permitió abordar el proyecto de manera
+progresiva, incluyendo tanto el desarrollo técnico como la elaboración del informe final y la preparación de la 
+exposición.
 
-\textbf{Segundo cuatrimestre (09/03/2026 – 10/03/2026):}
-\begin{itemize}
-\item Generación inicial de datos sintéticos mediante LLMs.
-\item Análisis exploratorio de los datos generados.
-\item Exploración de librerias de generación de datos sintéticos (SDV, YData Synthetic, Gretel, etc.).
-\item Validación y discusión de resultados con la experta en dominio.
-\item Evaluación de alternativas para la generación de datos más realistas.
-\item Adopción de OPM Flow como herramienta de simulación.
-\item Selección de datos correspondientes a los reservorios Norne y Volve.
-\item Análisis exploratorio de los nuevos datos.
-\item Entrenamiento y evaluación de modelos de machine learning:
-\begin{itemize}
-\item Modelo baseline (Ridge).
-\item Random Forest.
-\item XGBoost.
-\item LSTM con integración de datos PVT.
-\item Comparación de resultados y selección del modelo final.
-\end{itemize}
-\item Evaluación de tecnologías para el desarrollo de la aplicación web.
-\item Diseño de la arquitectura de la aplicación y definición de endpoints.
-\item Implementación de la API REST para la predicción de presión.
-\item Implementación de la interfaz de usuario para la visualización de resultados.
-\item Integración del modelo con la aplicación.
-\item Visualización de resultados y validación final.
-\item Elaboración del informe final y entrega del proyecto.
-\end{itemize}
+A lo largo de la cursada, se mantuvo un seguimiento periódico mediante reuniones quincenales con el tutor, en las 
+cuales se evaluaron los avances realizados, se resolvieron dudas especialmente vinculadas al dominio del problema
+y se definieron los próximos pasos a seguir.
+
+A continuación, se presenta el cronograma detallado de las actividades desarrolladas en cada etapa del proyecto.
+
+\newpage
+\subsection{Cronograma del segundo cuatrimestre 2025}
+
+A continuación, se presenta el cronograma detallado de las actividades desarrolladas durante el segundo 
+cuatrimestre de 2025, comprendido entre los meses de agosto y diciembre, siendo un total de 16 semanas.
+
+Durante este período se llevaron a cabo tareas clave vinculadas a la definición de la propuesta del proyecto, 
+el estudio del dominio de aplicación, la identificación de variables relevantes y la espera de datos 
+provenientes de la industria necesarios para el desarrollo del modelo de machine learning.
+
+El diagrama de Gantt correspondiente se encuentra organizado en unidades mensuales, lo que permite una 
+visualización clara de la distribución temporal de las actividades a lo largo del cuatrimestre.
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-4cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{5}
+
+\gantttitle{Estudio (Agosto – Diciembre)}{5} \\
+
+\ganttbar{Propuesta}{2}{2} \\
+\ganttbar{Estudio del dominio}{3}{4} \\
+\ganttbar{Identificación de variables}{3}{4} \\
+\ganttbar{Espera por datos de PAE}{3}{5} \\
+\ganttbar{Hito de mitad de proyecto}{4}{4} \\
+
+\end{ganttchart}
+}
+
+\caption{Estudio del dominio}
+\end{figure}
+
+La propuesta fue entregada el 29 de septiembre de 2025 y fue aprobada el
+13 de octubre de 2025.
+
+El hito de mitad de proyecto fue entregado el 30 de noviembre de 2025.
+
+\newpage
+\subsection{Cronograma del primer cuatrimestre 2026}
+
+A continuación, se presenta el cronograma detallado de las actividades desarrolladas durante el primer 
+cuatrimestre de 2026, comprendido entre los meses de marzo y junio.
+
+En este período se llevaron a cabo tareas fundamentales del proyecto, organizadas en tres grandes ejes: la 
+generación y análisis de datos, el entrenamiento y evaluación de modelos, y el desarrollo de la aplicación web.
+
+Cada uno de los diagramas de Gantt incluidos corresponde a una fase específica, en la que se describen las 
+tareas realizadas junto con su duración y distribución temporal a lo largo del cuatrimestre.
+
+La segmentación en tres diagramas permite evidenciar de manera clara el carácter incremental del desarrollo, 
+destacando la existencia de hitos intermedios y una progresión estructurada hacia la finalización del proyecto.
+
+Por último, cabe destacar que la planificación temporal de cada diagrama se encuentra organizada en unidades 
+semanales, lo que facilita una visualización precisa del avance de las actividades.
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-5cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{4}
+
+\gantttitle{Datos (Marzo)}{4} \\
+
+\ganttbar{Datos sintéticos (LLMs)}{1}{1} \\
+\ganttbar{Datos sintéticos (SDV, YData)}{1}{1} \\
+\ganttbar{EDA}{1}{2} \\
+\ganttbar{OPM Flow}{3}{3} \\
+\ganttbar{EDA}{3}{4}
+
+\end{ganttchart}
+}
+
+\caption{Generación y análisis de datos}
+\end{figure}
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-4cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{4}
+
+\gantttitle{Modelos (Abril)}{4} \\
+
+\ganttbar{Ridge}{1}{3} \\
+\ganttbar{RF}{1}{3} \\
+\ganttbar{XGBoost}{1}{3} \\
+\ganttbar{LSTM + PVT}{2}{3} \\
+\ganttbar{Comparación de modelos}{3}{4} \\
+\ganttbar{Selección de modelo}{4}{4}
+
+\end{ganttchart}
+}
+
+\caption{Entrenamiento y evaluación de modelos}
+\end{figure}
+
+\begin{figure}[htbp]
+
+\makebox[\textwidth][c]{
+\hspace{-4cm} % ← ajustá este valor
+\begin{ganttchart}[
+    y unit title=0.4cm,
+    y unit chart=1.5cm,
+    x unit=2.1cm,
+    vgrid, hgrid,
+    title height=1,
+    bar height=0.5,
+    bar label font=\small,
+    title label font=\small
+]{1}{5}
+
+\gantttitle{Aplicación (Mayo-Junio)}{5} \\
+
+\ganttbar{Evaluación de tecnologías}{1}{1} \\
+\ganttbar{Arquitectura}{1}{1} \\
+\ganttbar{Backend}{2}{4} \\
+\ganttbar{Frontend}{2}{4} \\
+\ganttbar{Informe final}{5}{5}
+
+\end{ganttchart}
+}
+
+\caption{Desarrollo de la aplicación y cierre del proyecto}
+\end{figure}
 
 % ============================================================
 % 16. RIESGOS MATERIALIZADOS Y LECCIONES APRENDIDAS
@@ -1258,7 +1427,7 @@ directamente en la planificación inicial y retrasó el avance del proyecto, par
 las etapas de experimentación y modelado.
 
 Se analizaron fuentes de datos públicas, como la información disponible en el
-Capítulo IV de la Secretaría de Energía de la República Argentina. No obstante, estas fuentes no
+Capítulo IV de la Secretaría de Energía de la República Argentina~\cite{seenergia}. No obstante, estas fuentes no
 incluyen datos de presión de reservorios, lo que limitó su utilidad para el problema abordado y
 reforzó la dependencia de datos privados de la industria.
 
@@ -1297,27 +1466,40 @@ donde el conocimiento técnico por sí solo no es suficiente.
 \newpage
 \section{Impactos sociales y ambientales del proyecto}
 
-Actualizar esto:
-
-Una estimación precisa de la presión de yacimiento es indispensable en la producción de hidrocarburos, ya
-que define un estrecho ``margen de presión'' operativo que es fundamental para la seguridad, la eficiencia
-y la rentabilidad.
-
-En este contexto, la solución propuesta puede tener impacto en distintos aspectos de la industria:
+Conviene aclarar el alcance antes de avanzar: el trabajo es una prueba de concepto, así
+que lo que sigue son impactos potenciales del enfoque, no resultados ya conseguidos.
+Estimar bien la presión de un yacimiento importa porque define un margen operativo
+estrecho, del que dependen la seguridad y la eficiencia de la operación.
 
 \subsection{Impacto económico}
 
-\begin{itemize}
-  \item \textbf{Optimización de la producción}: permite una mejor planificación de las estrategias de
-  extracción y selección de métodos de recuperación adecuados, reduciendo costos operativos.
-\end{itemize}
+Una mejor estimación de presión ayuda a planificar la extracción y a elegir el método de
+recuperación secundaria, lo que baja costos. También hay un ahorro de cómputo: una vez
+entrenado, el modelo predice en milisegundos, mientras que una simulación numérica completa
+tarda horas o días. Eso permite explorar más escenarios con menos recursos. Por último, la
+interfaz web acerca la estimación a ingenieros sin formación en ciencia de datos, que de
+otro modo dependerían de un especialista.
 
-\subsection{Impacto social y ambiental}
+\subsection{Impacto social}
 
-\begin{itemize}
-  \item \textbf{Reducción de riesgos:} una correcta estimación de la presión puede evitar consecuencias
-  catastróficas como la pérdida de equipos, daños medioambientales e incluso la pérdida de vidas humanas.
-\end{itemize}
+Mantener la presión dentro de un margen seguro reduce el riesgo de eventos graves, como un
+descontrol de pozo o la pérdida de equipos, que pueden costar vidas. Además, el sistema no
+funciona como una ``caja negra'': explica cómo se procesaron los datos y muestra la
+incertidumbre de la predicción, lo que ayuda a tomar decisiones más informadas.
+
+\subsection{Impacto ambiental}
+
+Anticipar problemas de presión ayuda a evitar \textit{blowouts} y derrames, con la
+contaminación que traen. Una mejor gestión de la inyección de agua evita desperdiciar agua
+y energía. Y reemplazar corridas de simulador por inferencias del modelo baja el consumo
+energético del modelado.
+
+\subsection{Consideración sobre el alcance}
+
+Hay que reconocer que la herramienta opera dentro de la industria de los hidrocarburos. Su
+aporte no es extraer más, sino hacer más seguras y eficientes operaciones que ya existen.
+La veta ambiental positiva está ahí: en la prevención de daños y en el uso más cuidadoso
+del agua y la energía.
 
 % ============================================================
 % 18. TRABAJOS FUTUROS (OPCIONAL)
@@ -1325,7 +1507,61 @@ En este contexto, la solución propuesta puede tener impacto en distintos aspect
 \newpage
 \section{Trabajos futuros}
 
-Texto (sección opcional).
+El trabajo deja varias líneas abiertas, tanto del lado del modelo como de la aplicación.
+
+\subsection{Física embebida (PINN de balance de materiales)}
+
+La experimentación mostró que ningún modelo generaliza bien a un campo cuyo régimen no vio
+durante el entrenamiento, como pasó con SPE9, que cruza el punto de burbuja y libera gas.
+Una salida es dejar de aprender todo desde los datos y meter la física adentro del modelo.
+La ecuación de balance de materiales describe cómo cae la presión a medida que se produce e
+inyecta fluido; usada como esqueleto del modelo, es ella la que carga con la extrapolación
+a un campo nuevo.
+
+Las exploraciones preliminares en esta dirección son alentadoras: una versión basada en un
+modelo de tanque, con un solo parámetro físico ajustable, generaliza a un campo no visto
+donde los modelos puramente data-driven daban $R^2$ negativo. Sumar el término de gas libre
+($B_g$) ayuda además en el régimen que cruza el punto de burbuja. El paso siguiente es
+desarrollar esto como un PINN completo, que combine la ecuación física con una corrección
+aprendida, y evaluarlo bajo el mismo protocolo \textit{leave-one-field-out}. Esta línea
+también concreta el uso de PINNs que se anticipa en el estado del arte.
+
+\subsection{Calibración few-shot}
+
+Los experimentos de cobertura dejaron una observación clara: la predicción \textit{zero-shot}
+a un campo nuevo falla por el cambio de dominio, pero alcanza con muy pocos datos del campo
+nuevo para corregirlo. Agregar una sola simulación del campo objetivo al entrenamiento lleva
+el $R^2$ de alrededor de 0,14 a 0,89.
+
+En lugar de perseguir una generalización \textit{zero-shot} perfecta, conviene diseñar un
+flujo de calibración: ante un yacimiento nuevo, conseguir un puñado de simulaciones (o algo
+de datos reales) y reajustar el modelo. Queda por cuantificar cuántas corridas hacen falta
+para alcanzar una precisión objetivo. La implicancia práctica es que baja la barrera de
+datos para usar la herramienta en un campo que no estaba representado.
+
+\subsection{Más campos y datos reales}
+
+El trabajo se apoyó en tres campos sintéticos: Volve, Norne y SPE9. Ampliar ese conjunto,
+sobre todo con datos reales de producción y presión de la industria, permitiría un
+\textit{leave-one-field-out} más exigente y, sobre todo, comprobar si las conclusiones
+obtenidas con datos sintéticos se sostienen frente a datos de campo.
+
+\subsection{Validación contra métodos físicos (PTA/EBM)}
+
+La propuesta inicial planteaba contrastar las predicciones del modelo con las técnicas
+clásicas de la ingeniería de reservorios: el Análisis de Transientes de Presión (PTA) y la
+Ecuación de Balance de Materiales (EBM). Esa comparación quedó pendiente. Hacerla ubicaría
+al enfoque de machine learning respecto de las herramientas ya establecidas y serviría para
+chequear la consistencia física de las estimaciones.
+
+\subsection{Mejoras en la aplicación web}
+
+El modelo que sirve hoy la aplicación usa un encoder que comprime la tabla PVT junto con
+features de superficie. Una mejora natural es migrar esas features a balance de materiales
+(voidage neto), que son más físicas y transfieren mejor entre campos. También conviene
+mostrar la incertidumbre de la predicción como media y desvío sobre varias semillas, en
+lugar de una corrida única, y avanzar hacia un despliegue, ya que por ahora la aplicación
+corre solo en entorno local.
 
 % ============================================================
 % 19. CONCLUSIONES
@@ -1341,17 +1577,71 @@ Texto.
 \newpage
 \section{Aportes individuales}
 
+En la siguiente tabla se muestran los aportes individuales de cada integrante:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|>{\raggedright\arraybackslash}p{4cm}|c|c|c|c|}
+  \hline
+   & \textbf{Franco Bragantini} & \textbf{Máximo Palopoli} & \textbf{Mateo Rico} & \textbf{Alan Valdevenito} \\
+  \hline
+  Cantidad de horas insumidas & - & - & 385 & - \\
+  \hline
+  Elaboración de la propuesta & - & - & 22 & - \\
+  \hline
+  Estudio del dominio & - & - & 45 & - \\
+  \hline
+  Elaboración del hito de mitad de proyecto & - & - & 15 & - \\
+  \hline
+  Investigación sobre generación de datos sintéticos & - & - & 27 & - \\
+  \hline
+  Generación de datos sintéticos & - & - & 81 & - \\
+  \hline
+  Análisis exploratorio de datos & - & - & 38 & - \\
+  \hline
+  Entrenamiento de modelo & - & - & 109 & - \\
+  \hline
+  Desarrollo de la aplicación web & - & - & 20 & - \\
+  \hline
+  Elaboración del informe final & - & - & 28 & - \\
+  \hline
+\end{tabular}
+\end{table}
 
 % ============================================================
-% 21. REFERENCIAS
+% 21. ANEXOS
 % ============================================================
 \newpage
-\section{Referencias}
+\section{Anexos}
+
+Contenido de los anexos.
+
+
+% ============================================================
+% 22. REFERENCIAS
+% ============================================================
+\newpage
 
 \begin{thebibliography}{99}
   \bibitem{ref1} Barriol, Y. (2005). \textit{Las presiones de las operaciones de perforación y
   producción}. Oilfield Review, 22.
   \url{https://usuarios.geofisica.unam.mx/gvazquez/geoquimpetrolFI/zonadesplegar/Lecturas/Las\%20presiones\%20de\%20las\%20operaciones\%20\%20de\%20perforacion\%20y\%20producc.pdf}
+
+  \bibitem{pta} PetroWiki (SPE). \textit{Pressure transient testing}.
+  \url{https://petrowiki.spe.org/Pressure_transient_testing}
+
+  \bibitem{mbe} PetroWiki (SPE). \textit{Material balance in oil reservoirs}.
+  \url{https://petrowiki.spe.org/Material_balance_in_oil_reservoirs}
+
+  \bibitem{ref5} Ali, A. (2021). \textit{Machine learning based data-driven methods for modelling and
+  simulation of pressure dynamics and fluid flow in natural gas reservoirs} (Tesis doctoral, University of
+  Sheffield).
+  \url{https://etheses.whiterose.ac.uk/id/eprint/29161/1/Aliyuda_Final_Thesis.pdf}
+
+  \bibitem{ref6} Raissi, M., Perdikaris, P., \& Karniadakis, G. E. (2019). \textit{Physics-Informed Neural
+  Networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial
+  differential equations}. Journal of Computational Physics, 378, 686-707.
+  \url{https://www.sciencedirect.com/science/article/abs/pii/S0021999118307125}
 
   \bibitem{ref2} Maarouf, A., Tahir, S., Su, S., Kloucha, C. K., \& Mustapha, H. (2023). \textit{A
   comparative study for deep-learning-based methods for automated reservoir simulation}. SPE Reservoir
@@ -1367,23 +1657,29 @@ Texto.
   Transforming Reservoir Engineering}. Novi Labs.
   \url{https://novilabs.com/blog/ai-in-reservoir-engineering-how-artificial-intelligence-is-transforming-oil-gas/}
 
-  \bibitem{ref5} Ali, A. (2021). \textit{Machine learning based data-driven methods for modelling and
-  simulation of pressure dynamics and fluid flow in natural gas reservoirs} (Tesis doctoral, University of
-  Sheffield).
-  \url{https://etheses.whiterose.ac.uk/id/eprint/29161/1/Aliyuda_Final_Thesis.pdf}
+  \bibitem{opmflow} Open Porous Media (OPM) Initiative. \textit{OPM Flow --- simulador de reservorios open
+  source}. \url{https://opm-project.org/}
 
-  \bibitem{ref6} Raissi, M., Perdikaris, P., \& Karniadakis, G. E. (2019). \textit{Physics-Informed Neural
-  Networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial
-  differential equations}. Journal of Computational Physics, 378, 686-707.
-  \url{https://www.sciencedirect.com/science/article/abs/pii/S0021999118307125}
+  \bibitem{eclipse} SLB (Schlumberger). \textit{ECLIPSE --- formato y simulador de referencia de
+  reservorios}. \url{https://www.software.slb.com/products/eclipse}
+
+  \bibitem{norne} Open Porous Media (OPM). \textit{Norne benchmark case} (repositorio \texttt{opm-tests}).
+  \url{https://github.com/OPM/opm-tests/tree/master/norne}
+
+  \bibitem{volve} Equinor. \textit{Volve field data set} (datos abiertos del campo Volve).
+  \url{https://www.equinor.com/energy/volve-data-sharing}
+
+  \bibitem{vrr} PetroWiki (SPE). \textit{Voidage replacement ratio}.
+  \url{https://petrowiki.spe.org/Voidage_replacement_ratio}
+
+  \bibitem{resdata} Equinor. \textit{resdata --- librería para leer los archivos de salida del simulador
+  ECLIPSE / OPM Flow}. \url{https://github.com/equinor/resdata}
+
+  \bibitem{spe9} Society of Petroleum Engineers. \textit{SPE Comparative Solution Project} (modelo benchmark
+  SPE9). \url{https://www.spe.org/web/csp/}
+
+  \bibitem{seenergia} Secretaría de Energía, República Argentina. \textit{Portal de Datos Abiertos de
+  Energía}. \url{http://datos.energia.gob.ar/}
 \end{thebibliography}
-
-% ============================================================
-% 22. ANEXOS
-% ============================================================
-\newpage
-\section{Anexos}
-
-Contenido de los anexos.
 
 \end{document}
