@@ -1177,6 +1177,115 @@ régimen parecido (Volve, Norne), y ningún modelo transfiere a un régimen que 
 (SPE9, que cruza el punto de burbuja). Sin información del campo objetivo, ningún modelo
 puramente \textit{data-driven} generaliza de verdad.
 
+\subsection{Física embebida: PINN de balance de materiales}
+\label{sec:pinn}
+
+El experimento anterior marcó el límite del enfoque puramente \textit{data-driven}: sin
+información del campo objetivo, ninguna familia de modelo generaliza a un régimen
+termodinámico que no vio. La salida que anticipaba la propuesta del proyecto es incorporar
+la física al modelo (PINNs~\cite{ref6}). En esta sección se evalúa esa línea con un modelo
+híbrido de balance de materiales, bajo el mismo protocolo \textit{leave-one-field-out} de
+la sección anterior.
+
+El modelo parte de la ecuación de balance de materiales del reservorio: la presión cae en
+proporción al volumen vaciado (lo producido menos lo inyectado, medido en volúmenes de
+reservorio), con la compresibilidad total como factor. Esa relación se escribe como una
+ecuación diferencial y se integra con un paso de Euler diferenciable, de modo que los
+parámetros físicos se ajustan por descenso de gradiente igual que los pesos de una red. La
+compresibilidad total $c_t(P)$ no es constante: se dispara cuando el reservorio cruza el
+punto de burbuja y libera gas, lo que se representa con una transición suave alrededor de
+$P_b$ gobernada por tres parámetros físicos acotados a rangos realistas. Lo que el modelo
+de tanque no puede representar (acuífero, empuje, heterogeneidad espacial) lo aprende una
+red neuronal pequeña que vive dentro de la misma ecuación y estima un influjo efectivo,
+con tres salvaguardas para que la física conserve el control: la corrección está acotada
+por construcción (no puede divergir), es adimensional (no puede memorizar la escala del
+campo de entrenamiento) y está regularizada hacia cero.
+
+La evaluación replica el protocolo de la sección~\ref{sec:lofo} y agrega dos ablaciones:
+el tanque clásico de un parámetro y la misma ecuación diferencial sin red (``física
+pura''). La parte neuronal se entrena con tres semillas de inicialización y se reporta
+media $\pm$ desvío. Además del modo \textit{zero-shot} se evalúa un modo
+\textit{few-shot}: calibrar dos o tres parámetros físicos interpretables, con la red
+congelada, usando $k = 1$ o $3$ simulaciones del campo nuevo elegidas al azar, y evaluando
+sobre las restantes. Los mismos subconjuntos de calibración se usan para la física pura y
+para el híbrido, de modo que la comparación es apareada, y el desvío reportado incluye
+tanto la variación por subconjunto como por semilla.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Campo objetivo} & \textbf{Tanque 1k} & \textbf{Física pura} & \textbf{Híbrido} & \textbf{Híbrido few $k{=}1$} & \textbf{Híbrido few $k{=}3$} \\
+\hline
+Volve & -0.13 & diverge & -0.30 $\pm$ 0.05 & +0.36 $\pm$ 0.03 & +0.38 $\pm$ 0.04 \\
+\hline
+Norne & +0.65 & +0.63 & +0.72 $\pm$ 0.10 & +0.82 $\pm$ 0.04 & +0.82 $\pm$ 0.04 \\
+\hline
+SPE9  & -0.00 & -0.36 & +0.39 $\pm$ 0.15 & +0.90 $\pm$ 0.06 & +0.95 $\pm$ 0.02 \\
+\hline
+\end{tabular}
+\caption{PINN de balance de materiales bajo leave-one-field-out ($R^2$ sobre el campo no
+visto). Las tres primeras columnas son \textit{zero-shot}; las dos últimas calibran
+parámetros físicos con $k$ simulaciones del campo nuevo (evaluación sobre las restantes).
+En Volve la física pura diverge por la no identificabilidad de la compresibilidad
+sub-saturada, que el entrenamiento (campos mayormente saturados) casi no ejercita.}
+\label{tab:pinn}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{img/pinn_zeroshot_fewshot.png}
+  \caption{Izquierda: $R^2$ \textit{zero-shot} por campo (barras del híbrido con desvío
+  entre semillas; valores recortados a $-1$). Derecha: \textit{few-shot} con una sola
+  simulación de calibración, física pura vs híbrido (media $\pm$ desvío).}
+  \label{fig:pinn_barras}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{img/pinn_trayectoria_spe9.png}
+  \caption{Trayectoria de presión en una simulación de SPE9 no usada para calibrar: real,
+  híbrido \textit{zero-shot} e híbrido \textit{few-shot} ($k=1$). La calibración de dos
+  parámetros físicos corrige el sesgo del \textit{zero-shot} y recupera la forma de la
+  caída.}
+  \label{fig:pinn_spe9}
+\end{figure}
+
+De este experimento se desprenden cuatro observaciones:
+
+\begin{itemize}
+  \item La corrección neuronal acotada elimina el colapso \textit{zero-shot}: la
+  física pura diverge en Volve; el híbrido, con el influjo acotado por construcción, se
+  mantiene en rango físico en los tres campos. La cota importa más que la expresividad.
+
+  \item SPE9 \textit{zero-shot} da el primer $R^2$ global positivo del proyecto:
+  los modelos \textit{data-driven} de la sección~\ref{sec:lofo} y las ablaciones físicas
+  dan $R^2$ negativo sobre SPE9 sin datos del campo; el híbrido da $+0.39 \pm 0.15$ con
+  las tres semillas en positivo. La mirada por simulación modera el resultado: la mediana
+  por simulación depende de la semilla (de $+0.39$ a $-0.05$), por lo que hay
+  transferencia real pero todavía no robusta.
+
+  \item El \textit{few-shot} es fuerte y consistente: con una sola simulación de
+  calibración el $R^2$ de SPE9 sube a $0.90 \pm 0.06$, y con tres a $0.95 \pm 0.02$,
+  consistente entre semillas y muy por encima de la física pura con la misma calibración
+  apareada ($0.59 \pm 0.11$). Calibrar dos compresibilidades físicas interpretables con
+  poquísimos datos del campo nuevo alcanza para recuperar el desempeño.
+
+  \item Volve confirma un techo estructural ($\approx 0.35$--$0.40$): ni la
+  corrección aprendida ni más simulaciones de calibración lo superan; la limitación es la
+  geometría 0-D del tanque (Volve es heterogéneo y su presión sube por encima de la
+  inicial), no la falta de datos ni de flexibilidad. La palanca para Volve es física
+  espacial, no más parámetros.
+\end{itemize}
+
+Como limitación metodológica, los hiperparámetros del modelo se fijaron iterando sobre
+estos mismos tres campos sintéticos, de modo que los resultados \textit{zero-shot} pueden
+estar favorecidos por esa adaptación; la validación definitiva requiere un cuarto campo
+ajeno a todo el ciclo de desarrollo. Aun con ese recaudo, el contraste es claro: la física
+embebida es la única familia que mostró señal de extrapolación \textit{zero-shot}, y cada
+pieza de física correcta que se incorporó (el término de gas libre, la compresibilidad
+dependiente de la presión) mejoró la generalización entre campos.
+
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
 % ============================================================
