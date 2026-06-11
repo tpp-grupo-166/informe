@@ -15,6 +15,14 @@
 \usepackage{float}
 \usepackage{pgfgantt}
 \usepackage{array}
+\usepackage{etoolbox}
+\usepackage{subcaption}
+
+% Hacer que la sección de Referencias quede numerada.
+% Por defecto, thebibliography la emite con \section* (sin número).
+\makeatletter
+\patchcmd{\thebibliography}{\section*{\refname}}{\section{\refname}}{}{}
+\makeatother
 
 
 % ====== INTERLINEADO 1,5 ======
@@ -149,9 +157,9 @@
 
 
 \bigskip
-En Buenos Aires a [día] de [mes] del año [año] se reúnen Dr. Hernán Merlino 
-con los estudiantes de la carrera de Ingeniería en Informática: Franco Julián Bragantini,
-Máximo Palopoli, Mateo Julián Rico y Alan Valdevenito.
+En Buenos Aires a 10 de junio del año 2026 se reúnen Dr. Hernán Merlino 
+con los estudiantes de la carrera de Ingeniería en Informática: Franco Julián Bragantini (DNI),
+Máximo Palopoli (44.670.555), Mateo Julián Rico (43.632.926) y Alan Valdevenito (43.096.399).
 El objetivo de la reunión es revisar el Informe Final del Trabajo Profesional de Ingeniería en Informática.
 
 Luego de haber leído el informe del Trabajo Profesional \textbf{Data Analytics para la estimación de la presión de yacimientos de petróleo},
@@ -160,11 +168,43 @@ proyecto y avala el documento presentado como Informe Final, tanto en su complet
 
 \vspace{1.5cm}
 
-Firma y aclaración del director: [firma y aclaración]
+Firma y aclaración del director:
 
-\vspace{3cm}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.2\textwidth]{img/firmas/hernan.png}\\
+  \small Hernán Merlino
+\end{figure}
 
-Firmas y aclaraciones de los estudiantes: [firmas y aclaraciones]
+
+\vspace{1cm}
+
+Firmas y aclaraciones de los estudiantes: 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/template.png}\\
+        \small Franco Bragantini
+    \end{subfigure}
+    \hspace{3cm}
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/maxi.png}\\
+        \small Máximo Palopoli
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/mateo.png}\\
+        \small Mateo Rico
+    \end{subfigure}
+    \hspace{3cm}
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/alan.png}\\
+        \small Alan Valdevenito
+    \end{subfigure}
+\end{figure}
 
 % ============================================================
 % 3. RESUMEN
@@ -203,8 +243,8 @@ production. Traditional methods, based on reservoir physics, present limitations
 increasing volume and complexity of modern data. In this context, new approaches are required to provide
 fast, robust, and scalable predictions.
 
-This project consists on the development of a system to estimate the pressure of oil resservoirs, 
-based on \textit{Data Analytics} and \textit{Machine Learning} techniques for reservoir pressure estimation.
+This project consists of the development of a system to estimate the pressure of oil reservoirs,
+based on \textit{Data Analytics} and \textit{Machine Learning} techniques.
 The solution integrates a predictive model that processes reservoir data, along with a web interface designed for engineers without data science expertise.
 
 % ============================================================
@@ -391,12 +431,26 @@ autenticación. Una vez dentro del sistema, el usuario puede cargar diferentes t
 \item Parámetros del reservorio en formato estructurado (por ejemplo, archivos TOML).
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{img/web/pantalla_carga_datos.jpeg}
+  \caption{Pantalla de carga de datos en la aplicación web}
+  \label{fig:pantalla_carga_datos}
+\end{figure}
+
 Estos datos son procesados por el backend —desarrollado en Python— que integra un modelo de machine learning previamente 
 entrenado. El modelo es capaz de combinar información temporal, física y termodinámica para generar una estimación de la 
 presión del reservorio.
 
 En cuanto a la visualización, el frontend —desarrollado con TypeScript y React— presenta los resultados de manera interactiva y 
 clara para el usuario. Se incluyen gráficos que permiten analizar la evolución de la presión estimada a lo largo del tiempo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{img/web/pantalla_resultados.jpeg}
+  \caption{Pantalla de resultados de presión en la aplicación web}
+  \label{fig:pantalla_resultados}
+\end{figure}
 
 Asimismo, la interfaz incorpora componentes que facilitan la interpretación de los resultados, permitiendo identificar la influencia 
 de las distintas variables de entrada en el comportamiento del modelo. De esta manera, no solo se muestra el valor estimado, sino que 
@@ -1077,15 +1131,18 @@ entrena con los otros dos campos completos y predice el campo que nunca vio.
 
 Los tres campos utilizados son Volve (10 simulaciones), Norne (30) y SPE9 (100). Para que
 la comparación entre familias de modelo sea justa, los tres reciben exactamente la misma
-entrada: el mismo conjunto de features adimensionales (normalizadas por el pore-volume, sin
-lags del target y descartando $B_o$, $B_g$ y $R_s$ por su dependencia directa de la
+entrada: el mismo conjunto de features adimensionales, construido únicamente con
+producción, inyección y propiedades estáticas (normalizadas por el pore-volume, sin
+ninguna variable derivada de la serie de presión, ni lags ni derivadas, y descartando
+$B_o$, $B_g$ y $R_s$ por su dependencia directa de la
 presión), y el mismo objetivo anclado a la presión inicial ($\Delta = P - P_{init}$, del que
 se reconstruye $P = P_{init} + \widehat{\Delta}$). Anclar a $P_{init}$ es lo que permite
 comparar campos con niveles de presión distintos: sin este anclaje, los tres modelos arrojan
 $R^2$ negativo en todos los campos.
 
 Se comparan tres familias: Ridge (lineal regularizado), XGBoost (árboles con boosting) y
-LSTM (red recurrente). Cabe aclarar que el LSTM evaluado en este experimento es una versión
+LSTM (red recurrente). El LSTM se entrena con tres semillas de inicialización y se reporta
+media $\pm$ desvío. Cabe aclarar que el LSTM evaluado en este experimento es una versión
 genérica sobre las mismas features, que no incorpora el encoder de PVT descrito
 anteriormente; por lo tanto, sus métricas aquí constituyen una cota inferior de su
 rendimiento real.
@@ -1096,53 +1153,59 @@ rendimiento real.
 \hline
 \textbf{Campo objetivo (R² zero-shot)} & \textbf{Ridge} & \textbf{XGBoost} & \textbf{LSTM} \\
 \hline
-Volve & -0.68 & +0.69 & +0.53 \\
+Volve & -6.70 & +0.63 & +0.54 $\pm$ 0.04 \\
 \hline
-Norne & +0.80 & +0.23 & +0.72 \\
+Norne & -42.40 & +0.27 & +0.05 $\pm$ 0.25 \\
 \hline
-SPE9  & +0.38 & -1.21 & -0.86 \\
+SPE9  & -0.54 & -1.85 & -1.91 $\pm$ 0.21 \\
 \hline
-R² medio & +0.17 & -0.10 & +0.13 \\
+R² medio & -16.55 & -0.32 & -0.44 \\
 \hline
-R² mediano por simulación & -0.16 & -0.33 & -0.05 \\
+R² mediano por simulación & -19.45 & -0.62 & -0.75 \\
 \hline
 \end{tabular}
 \caption{Generalización entre campos (leave-one-field-out). Cada fila es un campo no visto
 durante el entrenamiento. El $R^2$ mediano por simulación es más exigente: obliga a seguir la
-trayectoria de cada corrida, no sólo el nivel promedio del campo.}
+trayectoria de cada corrida, no sólo el nivel promedio del campo. La columna LSTM reporta
+media $\pm$ desvío sobre tres semillas de inicialización.}
 \label{tab:lofo}
 \end{table}
 
 De este experimento se desprenden varias observaciones:
 
 \begin{itemize}
-  \item \textbf{No hay un ganador único entre familias de modelo.} Cada modelo gana en un
-  campo distinto: XGBoost transfiere mejor a Volve ($R^2 = 0.69$) y Ridge a Norne
-  ($R^2 = 0.80$). A diferencia de lo observado en el experimento anterior, los modelos de
-  árboles \textit{sí} logran transferir a un campo no visto cuando reciben el target anclado
-  a $P_{init}$.
+  \item \textbf{XGBoost es el más estable y el único con transferencia parcial.} Queda en
+  positivo en los dos campos de régimen parecido al de entrenamiento (Volve $+0.63$, Norne
+  $+0.27$), aunque con un $R^2$ mediano por simulación modesto en Norne ($+0.16$): acompaña
+  el nivel de presión más que la trayectoria fina. A diferencia de lo observado en el
+  experimento anterior, los modelos de árboles \textit{sí} logran transferir parcialmente a
+  un campo no visto cuando reciben el target anclado a $P_{init}$.
 
-  \item \textbf{El LSTM es el más robusto.} Es el único positivo en Volve y Norne a la vez y
-  obtiene el mejor $R^2$ mediano por simulación; no se desploma como XGBoost en el campo más
-  difícil. El costo es un entrenamiento sensiblemente más lento.
+  \item \textbf{El LSTM conserva la transferencia en Volve.} Su resultado en Volve es
+  genuino y parejo entre semillas ($+0.54 \pm 0.04$); en Norne, en cambio, la media queda en
+  cero con un desvío grande entre semillas (de $-0.27$ a $+0.33$). Una corrida única podía
+  dar un resultado bueno o malo por azar de la inicialización; por eso se reporta media
+  $\pm$ desvío.
 
-  \item \textbf{XGBoost es el más volátil.} Su mayor capacidad le da el mejor resultado en
-  Volve pero el peor en SPE9 ($-1.21$): cuando el campo nuevo es muy distinto, sobreajusta y
-  extrapola mal.
+  \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola sin freno
+  fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne. Es
+  la contracara del comportamiento de los árboles: estos fallan por no extrapolar, lo
+  lineal por extrapolar de más.
 
-  \item \textbf{Ningún modelo resuelve SPE9.} Es el campo más distinto de los tres ---su
-  presión cruza el punto de burbuja y libera gas, un régimen ausente en el entrenamiento--- y
-  los tres modelos dan un $R^2$ pobre o negativo. El $+0.38$ de Ridge es engañoso: su $R^2$
-  por simulación es prácticamente nulo, es decir, acierta el nivel promedio entre
-  simulaciones pero no la trayectoria real.
+  \item \textbf{Ningún modelo resuelve SPE9.} Es el campo más distinto de los tres (su
+  presión cruza el punto de burbuja y libera gas, un régimen ausente en el entrenamiento) y
+  los tres modelos dan un $R^2$ negativo, tanto global como por simulación. La física que
+  no está en los datos de entrenamiento no se interpola.
 \end{itemize}
 
 La conclusión central de este experimento es que el factor que determina la transferencia no
 es tanto la familia de modelo (Ridge vs. XGBoost vs. LSTM) sino dos elementos metodológicos:
 \textbf{anclar la predicción a $P_{init}$} y \textbf{contar con cobertura de dominio}, esto
-es, que el entrenamiento incluya algún campo parecido al campo objetivo. Los modelos
-transfieren bien cuando el campo nuevo se asemeja a los de entrenamiento (Volve, Norne) y
-fallan cuando pertenece a un régimen que nunca vieron (SPE9, que cruza el punto de burbuja).
+es, que el entrenamiento incluya algún campo de régimen parecido al campo objetivo. Aun
+así, la transferencia es parcial: solo XGBoost queda en positivo en los dos campos de
+régimen parecido (Volve, Norne), y ningún modelo transfiere a un régimen que nunca vio
+(SPE9, que cruza el punto de burbuja). Sin información del campo objetivo, ningún modelo
+puramente \textit{data-driven} generaliza de verdad.
 
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
@@ -1481,7 +1544,59 @@ corre solo en entorno local.
 \newpage
 \section{Conclusiones}
 
-Texto.
+El objetivo planteado en la propuesta era construir un sistema basado en machine
+learning para estimar la presión de un reservorio, pensado para ingenieros sin formación
+en ciencia de datos. Ese objetivo se cumplió. El trabajo produjo el pipeline completo,
+desde la generación de datos sintéticos con OPM Flow (40 simulaciones de Volve y Norne,
+más SPE9 para la validación multi-campo), pasando por las \textit{features}
+adimensionales basadas en el balance de materiales y la comparación de cuatro familias de
+modelos, hasta la aplicación web que sirve las predicciones y explica cómo se procesaron
+los datos. Todos los componentes funcionan integrados.
+
+La conclusión técnica más importante no estaba en la propuesta original, sino que surgió
+durante la experimentación. Predecir la presión del campo con el que el modelo fue
+entrenado es un problema prácticamente resuelto: las cuatro familias evaluadas superan un
+$R^2$ de 0.9 \textit{in-distribution}. El desafío real es generalizar entre reservorios.
+El mismo modelo que alcanza un $R^2$ de 0.99 sobre Norne puede dar predicciones
+físicamente absurdas sobre Volve. Este \textit{domain shift} es lo que define la
+dificultad de aplicar machine learning en este dominio.
+
+Frente a ese problema, encontramos que los factores que determinan la transferencia entre
+campos son metodológicos antes que algorítmicos. Anclar la predicción a la presión
+inicial del reservorio y normalizar las cantidades por el volumen poral importó más que
+la elección entre Ridge, XGBoost o LSTM. Con el target anclado, hasta los modelos de
+árboles transfieren parcialmente a un campo no visto; sin el anclaje, ninguna familia lo
+logra. A igual representación, ningún modelo transfiere de verdad a los tres campos:
+XGBoost resultó el más estable, y el LSTM conservó la mejor parte de su transferencia en
+Volve. La aplicación web sirve el modelo LSTM de la línea secuencial con codificación de
+PVT, desarrollado en la experimentación con Norne y Volve.
+
+El experimento \textit{leave-one-field-out} marcó además el límite del enfoque puramente
+\textit{data-driven}: ningún modelo extrapola a un régimen termodinámico que no vio
+durante el entrenamiento, como pasa con SPE9, cuya presión cruza el punto de burbuja y
+libera gas. La física que no está en los datos de entrenamiento no se puede interpolar.
+Hay dos salidas: incorporarla al modelo, que es la línea de física embebida y PINNs que
+se desarrolla en Trabajos Futuros, o compensarla con datos del campo objetivo. Sobre esta
+segunda, los experimentos de cobertura indican que con muy pocas simulaciones del campo
+nuevo alcanza para recuperar el desempeño mediante calibración. El modo de uso realista
+del sistema, entonces, no es la generalización perfecta sin datos, sino calibrar con poca
+información del campo objetivo.
+
+En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
+la industria, se materializó por completo. La viabilidad del proyecto dependió de la
+capacidad de adaptación: el paso de esperar datos reales a generarlos con un simulador
+físico terminó marcando el rumbo del trabajo, y las reuniones quincenales con los
+directores permitieron detectar a tiempo los desvíos de alcance y de modelado. La lección
+que nos llevamos es que en un proyecto de datos aplicado a un dominio industrial, la
+estrategia de datos merece el mismo nivel de planificación que el modelado.
+
+Por último, corresponde delimitar el alcance de estas conclusiones. Todos los resultados
+se obtuvieron sobre datos simulados. La transferencia a datos de campo reales no fue
+demostrada y es la validación pendiente más importante, junto con el contraste contra los
+métodos físicos tradicionales (PTA y EBM), que estaba comprometido en la propuesta y
+quedó fuera de esta etapa. Dentro de esos límites, el trabajo deja un sistema funcional,
+una idea clara de dónde aporta el machine learning y dónde necesita de la física, y una
+dirección de continuación concreta.
 
 % ============================================================
 % 20. APORTES INDIVIDUALES
@@ -1497,25 +1612,25 @@ En la siguiente tabla se muestran los aportes individuales de cada integrante:
   \hline
    & \textbf{Franco Bragantini} & \textbf{Máximo Palopoli} & \textbf{Mateo Rico} & \textbf{Alan Valdevenito} \\
   \hline
-  Cantidad de horas insumidas & - & - & 385 & - \\
+  Cantidad de horas insumidas & - & 385 & 385 & - \\
   \hline
-  Elaboración de la propuesta & - & - & 22 & - \\
+  Elaboración de la propuesta & - & 20 & 22 & - \\
   \hline
-  Estudio del dominio & - & - & 45 & - \\
+  Estudio del dominio & - & 48 & 45 & - \\
   \hline
-  Elaboración del hito de mitad de proyecto & - & - & 15 & - \\
+  Elaboración del hito de mitad de proyecto & - & 14 & 15 & - \\
   \hline
-  Investigación sobre generación de datos sintéticos & - & - & 27 & - \\
+  Investigación sobre generación de datos sintéticos & - & 25 & 27 & - \\
   \hline
-  Generación de datos sintéticos & - & - & 81 & - \\
+  Generación de datos sintéticos & - & 30 & 81 & - \\
   \hline
-  Análisis exploratorio de datos & - & - & 38 & - \\
+  Análisis exploratorio de datos & - & 40 & 38 & - \\
   \hline
-  Entrenamiento de modelo & - & - & 109 & - \\
+  Entrenamiento de modelo & - & 110 & 109 & - \\
   \hline
-  Desarrollo de la aplicación web & - & - & 20 & - \\
+  Desarrollo de la aplicación web & - & 73 & 20 & - \\
   \hline
-  Elaboración del informe final & - & - & 28 & - \\
+  Elaboración del informe final & - & 25 & 28 & - \\
   \hline
 \end{tabular}
 \end{table}
@@ -1526,7 +1641,13 @@ En la siguiente tabla se muestran los aportes individuales de cada integrante:
 \newpage
 \section{Anexos}
 
-Contenido de los anexos.
+A continuación se listan los repositorios en los cuales se aloja el código del proyecto:
+
+\begin{itemize}
+  \item Aplicación web (frontend y backend) https://github.com/tpp-grupo-166/reservoir-pressure-web
+  \item Datasets y modelos de machine learning https://github.com/tpp-grupo-166/opm-datasets \\
+  En este repositorio también están incluidos tanto los modelos de reservorio como la herramienta que utilizamos para generar los datos sintéticos.
+\end{itemize}
 
 
 % ============================================================
