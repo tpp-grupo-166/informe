@@ -433,12 +433,26 @@ autenticación. Una vez dentro del sistema, el usuario puede cargar diferentes t
 \item Parámetros del reservorio en formato estructurado (por ejemplo, archivos TOML).
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9git\textwidth]{img/web/pantalla_carga_datos.jpeg}
+  \caption{Pantalla de carga de datos en la aplicación web}
+  \label{fig:pantalla_carga_datos}
+\end{figure}
+
 Estos datos son procesados por el backend —desarrollado en Python— que integra un modelo de machine learning previamente 
 entrenado. El modelo es capaz de combinar información temporal, física y termodinámica para generar una estimación de la 
 presión del reservorio.
 
 En cuanto a la visualización, el frontend —desarrollado con TypeScript y React— presenta los resultados de manera interactiva y 
 clara para el usuario. Se incluyen gráficos que permiten analizar la evolución de la presión estimada a lo largo del tiempo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{img/web/pantalla_resultados.jpeg}
+  \caption{Pantalla de resultados de presión en la aplicación web}
+  \label{fig:pantalla_resultados}
+\end{figure}
 
 Asimismo, la interfaz incorpora componentes que facilitan la interpretación de los resultados, permitiendo identificar la influencia 
 de las distintas variables de entrada en el comportamiento del modelo. De esta manera, no solo se muestra el valor estimado, sino que 
