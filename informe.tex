@@ -308,8 +308,6 @@ Entre los algoritmos más destacados se encuentran:
   que superan correlaciones empíricas.
   \item \textbf{Random Forest y XGBoost:} robustos y eficientes para predicción de presiones críticas
   (p. ej., presión de burbuja, presión de poro).
-  \item \textbf{Support Vector Regression (SVR):} eficaz en espacios de alta dimensionalidad, mejorando su
-  precisión mediante optimización de hiperparámetros.
   \item \textbf{Redes LSTM:} especialistas en series temporales, ideales para pronósticos de producción y presión.
 \end{itemize}
 
@@ -977,59 +975,6 @@ XGBoost obtiene la mejor performance in-distribution sobre Norne de todos los mo
 probados: R² = 0.991 y MAE de apenas 17 psi. Sin embargo, sobre Volve queda muy por detrás
 de Random Forest: el R² es apenas positivo (0.082), el MAE supera los 180 psi y el RMSE
 los 260 psi.
-
-
-\subsubsection{Support Vector Regression (SVR)}
-
-Como último modelo probamos un Support Vector Regression con kernel RBF, una familia
-distinta a las anteriores (basada en kernels en lugar de lineal o de árboles).
-
-\begin{table}[ht]
-\centering
-\caption{Métricas del modelo SVR (kernel RBF).}
-\label{tab:metricas-svr}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Split} & \textbf{R²} & \textbf{MAE (psi)} & \textbf{RMSE (psi)} \\
-\hline
-Norne test (in-distribution) & 0.986 & 22.07 & 27.03 \\
-\hline
-Volve (cross-reservoir) & 0.052 & 237.78 & 266.20 \\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{img/validacion/svr_norne_trayectoria.png}
-\caption{Comparación entre la presión real de Norne y la presión predicha por el modelo SVR}
-\label{fig:svr-norne-traj}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\textwidth]{img/validacion/svr_norne_parity.png}
-\caption{Parity plot entre la presión real de Norne vs. la presión predicha por el modelo SVR}
-\label{fig:svr-norne-parity}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{img/validacion/svr_volve_trayectoria.png}
-\caption{Comparación entre la presión real de Volve y la presión predicha por el modelo SVR}
-\label{fig:svr-volve-traj}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\textwidth]{img/validacion/svr_volve_parity.png}
-\caption{Parity plot entre la presión real de Volve vs. la presión predicha por el modelo SVR}
-\label{fig:svr-volve-parity}
-\end{figure}
-
-SVR alcanza buenas métricas in-distribution sobre Norne (R² 0.986, MAE 22 psi), comparables a las
-de Random Forest y XGBoost. Sin embargo, no es capaz de transferir estos valores a la predicción
-de Volve, ya que el R² es de apenas 0.052 y el MAE supera los 237 psi.
 
 \subsubsection{LSTM}
 
