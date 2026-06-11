@@ -224,7 +224,8 @@ La solución integra un modelo predictivo que consume y procesa datos físicos d
 facilita su uso por parte de ingenieros sin formación específica en ciencia de datos.
 
 La experimentación sobre tres campos sintéticos mostró que los modelos puramente
-\textit{data-driven} no generalizan a un yacimiento de régimen no visto. Frente a eso, el
+\textit{data-driven} (los que aprenden todo desde los datos) no generalizan a un
+yacimiento de régimen no visto. Frente a eso, el
 proyecto desarrolló y validó además un modelo de física embebida, una red neuronal
 informada por la ecuación de balance de materiales (PINN), que mostró la única señal de
 extrapolación a un campo nuevo y que, calibrado con muy pocas simulaciones del campo
@@ -1142,7 +1143,9 @@ La comparación anterior entrena con un único campo (Norne) y evalúa la transf
 segundo campo (Volve). Para poner a prueba la generalización de forma más exigente,
 realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}~\cite{spe9}, y
 adopta un protocolo de \textit{leave-one-out}: para cada campo objetivo, el modelo se
-entrena con los otros dos campos completos y predice el campo que nunca vio.
+entrena con los otros dos campos completos y predice el campo que nunca vio. A esta
+evaluación, en la que el modelo no recibe ningún dato del campo objetivo, se la conoce
+como \textit{zero-shot}.
 
 Los tres campos utilizados son Volve (10 simulaciones), Norne (30) y SPE9 (100). Para que
 la comparación entre familias de modelo sea justa, los tres reciben exactamente la misma
@@ -1197,8 +1200,9 @@ De este experimento se desprenden varias observaciones:
   \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola de más
   fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne.
 
-  \item \textbf{Ningún modelo resuelve SPE9.} SPE9 es el modelo de campo más distinto de los tres (su
-  presión cruza el punto de burbuja y libera gas, una propiedad que no está presente en los datos de entrenamiento) y
+  \item \textbf{Ningún modelo resuelve SPE9.} SPE9 es el modelo de campo más distinto de los tres: su
+  presión cae por debajo del punto de burbuja (la presión a partir de la cual el gas disuelto
+  en el petróleo se libera), un comportamiento que no está presente en los datos de entrenamiento, y
   los tres modelos dan un $R^2$ negativo, tanto global como por simulación.
 \end{itemize}
 
@@ -1212,42 +1216,51 @@ régimen parecido (Volve, Norne), y ningún modelo transfiere a un régimen que 
 \subsection{Física embebida: PINN de balance de materiales}
 \label{sec:pinn}
 
-El experimento anterior marcó el límite del enfoque puramente \textit{data-driven}: sin
-información del campo objetivo, ninguna familia de modelo generaliza a un régimen
-termodinámico que no vio. La salida que anticipaba la propuesta del proyecto es incorporar
-la física al modelo (PINNs~\cite{ref6}). En esta sección se evalúa esa línea con un modelo
-híbrido de balance de materiales, bajo el mismo protocolo \textit{leave-one-field-out} de
-la sección anterior.
+El experimento anterior mostró el límite de los modelos que aprenden todo desde los
+datos: sin información del campo objetivo, ninguno generaliza a un comportamiento que no
+vio durante el entrenamiento. La salida que ya anticipaba la propuesta del proyecto es
+incorporar la física al modelo (PINNs~\cite{ref6}). En esta sección evaluamos esa línea
+con un modelo híbrido de balance de materiales, bajo el mismo protocolo
+\textit{leave-one-out} de la sección anterior.
 
-El modelo parte de la ecuación de balance de materiales del reservorio: la presión cae en
-proporción al volumen vaciado (lo producido menos lo inyectado, medido en volúmenes de
-reservorio), con la compresibilidad total como factor. Esa relación se escribe como una
-ecuación diferencial y se integra con un paso de Euler diferenciable, de modo que los
-parámetros físicos se ajustan por descenso de gradiente igual que los pesos de una red. La
-compresibilidad total $c_t(P)$ no es constante: se dispara cuando el reservorio cruza el
-punto de burbuja y libera gas, lo que se representa con una transición suave alrededor de
-$P_b$ gobernada por tres parámetros físicos acotados a rangos realistas. Lo que el modelo
-de tanque no puede representar (acuífero, empuje, heterogeneidad espacial) lo aprende una
-red neuronal pequeña que vive dentro de la misma ecuación y estima un influjo efectivo,
-con tres salvaguardas para que la física conserve el control: la corrección está acotada
-por construcción (no puede divergir), es adimensional (no puede memorizar la escala del
-campo de entrenamiento) y está regularizada hacia cero.
+Partimos de la ecuación de balance de materiales del reservorio, que relaciona la caída
+de presión con el volumen que se extrajo menos el que se repuso por inyección. Escribimos
+esa relación como una ecuación diferencial y la integramos con un paso de Euler
+implementado en PyTorch. Esto nos permite ajustar los parámetros físicos por descenso de
+gradiente, de la misma forma en que se entrenan los pesos de una red. La compresibilidad
+total $c_t(P)$ no es constante: aumenta mucho cuando la presión cae por debajo del punto
+de burbuja y el gas disuelto se libera. Representamos ese cambio con una transición
+suave, definida por tres parámetros físicos acotados a rangos realistas.
 
-La evaluación replica el protocolo de la sección~\ref{sec:lofo} y agrega dos ablaciones:
-el tanque clásico de un parámetro y la misma ecuación diferencial sin red (``física
-pura''). La parte neuronal se entrena con tres semillas de inicialización y se reporta
-media $\pm$ desvío. Además del modo \textit{zero-shot} se evalúa un modo
-\textit{few-shot}: calibrar dos o tres parámetros físicos interpretables, con la red
-congelada, usando $k = 1$ o $3$ simulaciones del campo nuevo elegidas al azar, y evaluando
-sobre las restantes. Los mismos subconjuntos de calibración se usan para la física pura y
-para el híbrido, de modo que la comparación es apareada, y el desvío reportado incluye
-tanto la variación por subconjunto como por semilla.
+Este esquema corresponde al modelo de tanque de la ingeniería de reservorios, que trata
+al yacimiento como un único depósito homogéneo con una sola presión, sin dimensión
+espacial. Por eso hay efectos que no puede representar, como el aporte de un acuífero o
+la heterogeneidad de la roca. Esa parte faltante la aprende una red neuronal pequeña que
+está incluida dentro de la misma ecuación y estima un caudal de aporte adicional. Para
+que esta corrección no termine dominando al modelo físico le pusimos tres restricciones:
+su salida está acotada (no puede crecer sin límite), sus entradas y su salida están
+normalizadas con cantidades de cada simulación (no puede memorizar la escala del campo
+con el que se entrenó) y está penalizada para mantenerse cerca de cero salvo donde los
+datos indiquen lo contrario.
+
+La evaluación replica el protocolo de la sección~\ref{sec:lofo} y suma dos modelos de
+referencia más simples, que sirven para ver cuánto aporta cada parte: el tanque clásico,
+cuya única incógnita es un coeficiente de rigidez $k$ que fija cuánto cae la presión por
+unidad de volumen vaciado (de ahí el nombre ``tanque 1k'' en tablas y figuras), y la
+misma ecuación diferencial sin red (``física pura''). La parte neuronal se entrena con
+tres semillas de inicialización y se reporta media $\pm$ desvío. Además de la predicción
+\textit{zero-shot} probamos un modo \textit{few-shot}, es decir, con unos pocos datos del
+campo nuevo: tomamos una o tres simulaciones elegidas al azar, las usamos para reajustar
+dos o tres parámetros físicos (la red queda congelada) y evaluamos sobre las simulaciones
+restantes. Los mismos subconjuntos de calibración se usan para la física pura y para el
+híbrido, así la comparación entre ambos es justa, y el desvío reportado incluye tanto la
+variación por subconjunto como por semilla.
 
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-\textbf{Campo objetivo} & \textbf{Tanque 1k} & \textbf{Física pura} & \textbf{Híbrido} & \textbf{Híbrido few $k{=}1$} & \textbf{Híbrido few $k{=}3$} \\
+\textbf{Campo objetivo} & \textbf{Tanque 1k} & \textbf{Física pura} & \textbf{Híbrido} & \textbf{Few-shot (1 sim)} & \textbf{Few-shot (3 sims)} \\
 \hline
 Volve & -0.13 & diverge & -0.30 $\pm$ 0.05 & +0.36 $\pm$ 0.03 & +0.38 $\pm$ 0.04 \\
 \hline
@@ -1256,11 +1269,12 @@ Norne & +0.65 & +0.63 & +0.72 $\pm$ 0.10 & +0.82 $\pm$ 0.04 & +0.82 $\pm$ 0.04 \
 SPE9  & -0.00 & -0.36 & +0.39 $\pm$ 0.15 & +0.90 $\pm$ 0.06 & +0.95 $\pm$ 0.02 \\
 \hline
 \end{tabular}
-\caption{PINN de balance de materiales bajo leave-one-field-out ($R^2$ sobre el campo no
-visto). Las tres primeras columnas son \textit{zero-shot}; las dos últimas calibran
-parámetros físicos con $k$ simulaciones del campo nuevo (evaluación sobre las restantes).
-En Volve la física pura diverge por la no identificabilidad de la compresibilidad
-sub-saturada, que el entrenamiento (campos mayormente saturados) casi no ejercita.}
+\caption{PINN de balance de materiales bajo leave-one-out ($R^2$ sobre el campo no
+visto). Las tres primeras columnas son \textit{zero-shot}; las dos últimas son el híbrido
+calibrado con una o tres simulaciones del campo nuevo (evaluación sobre las restantes).
+En Volve la física pura diverge porque el entrenamiento (Norne y SPE9) casi no contiene
+el rango de presiones en el que opera Volve, y el parámetro de compresibilidad de ese
+rango queda sin ajustar.}
 \label{tab:pinn}
 \end{table}
 
@@ -1277,7 +1291,7 @@ sub-saturada, que el entrenamiento (campos mayormente saturados) casi no ejercit
   \centering
   \includegraphics[width=0.7\textwidth]{img/pinn_trayectoria_spe9.png}
   \caption{Trayectoria de presión en una simulación de SPE9 no usada para calibrar: real,
-  híbrido \textit{zero-shot} e híbrido \textit{few-shot} ($k=1$). La calibración de dos
+  híbrido \textit{zero-shot} e híbrido \textit{few-shot} (1 sim). La calibración de dos
   parámetros físicos corrige el sesgo del \textit{zero-shot} y recupera la forma de la
   caída.}
   \label{fig:pinn_spe9}
@@ -1286,36 +1300,37 @@ sub-saturada, que el entrenamiento (campos mayormente saturados) casi no ejercit
 De este experimento se desprenden cuatro observaciones:
 
 \begin{itemize}
-  \item La corrección neuronal acotada elimina el colapso \textit{zero-shot}: la
-  física pura diverge en Volve; el híbrido, con el influjo acotado por construcción, se
-  mantiene en rango físico en los tres campos. La cota importa más que la expresividad.
+  \item El híbrido no diverge en ningún campo. La física pura falla en Volve, mientras
+  que el híbrido se mantiene dentro de valores físicos razonables en los tres campos,
+  gracias a que la corrección aprendida está acotada.
 
   \item SPE9 \textit{zero-shot} da el primer $R^2$ global positivo del proyecto:
-  los modelos \textit{data-driven} de la sección~\ref{sec:lofo} y las ablaciones físicas
-  dan $R^2$ negativo sobre SPE9 sin datos del campo; el híbrido da $+0.39 \pm 0.15$ con
-  las tres semillas en positivo. La mirada por simulación modera el resultado: la mediana
-  por simulación depende de la semilla (de $+0.39$ a $-0.05$), por lo que hay
-  transferencia real pero todavía no robusta.
+  los modelos \textit{data-driven} de la sección~\ref{sec:lofo} y los dos modelos físicos
+  de referencia dan $R^2$ negativo sobre SPE9 sin datos del campo, y el híbrido da
+  $+0.39 \pm 0.15$ con las tres semillas en positivo. Si miramos simulación por
+  simulación el resultado es más modesto: la mediana depende de la semilla (va de $+0.39$
+  a $-0.05$), así que hay transferencia real pero todavía no robusta.
 
-  \item El \textit{few-shot} es fuerte y consistente: con una sola simulación de
-  calibración el $R^2$ de SPE9 sube a $0.90 \pm 0.06$, y con tres a $0.95 \pm 0.02$,
-  consistente entre semillas y muy por encima de la física pura con la misma calibración
-  apareada ($0.59 \pm 0.11$). Calibrar dos compresibilidades físicas interpretables con
-  poquísimos datos del campo nuevo alcanza para recuperar el desempeño.
+  \item El \textit{few-shot} funciona bien y de forma consistente: con una sola
+  simulación de calibración el $R^2$ de SPE9 sube a $0.90 \pm 0.06$, y con tres a
+  $0.95 \pm 0.02$, parecido entre semillas y muy por encima de la física pura calibrada
+  con los mismos datos ($0.59 \pm 0.11$). Con muy pocos datos del campo nuevo alcanza
+  para recuperar el desempeño.
 
-  \item Volve confirma un techo estructural ($\approx 0.35$--$0.40$): ni la
-  corrección aprendida ni más simulaciones de calibración lo superan; la limitación es la
-  geometría 0-D del tanque (Volve es heterogéneo y su presión sube por encima de la
-  inicial), no la falta de datos ni de flexibilidad. La palanca para Volve es física
-  espacial, no más parámetros.
+  \item En Volve el $R^2$ no pasa de $\approx 0.35$--$0.40$ con ningún modelo ni con más
+  simulaciones de calibración. El problema acá no son los datos sino el modelo de tanque
+  en sí: Volve es heterogéneo y su presión sube por encima de la inicial, algo que un
+  único depósito sin dimensión espacial no puede reproducir. Para mejorar en Volve haría
+  falta incorporar física espacial.
 \end{itemize}
 
 Como limitación metodológica, los hiperparámetros del modelo se fijaron iterando sobre
 estos mismos tres campos sintéticos, de modo que los resultados \textit{zero-shot} pueden
 estar favorecidos por esa adaptación; la validación definitiva requiere un cuarto campo
-ajeno a todo el ciclo de desarrollo. Aun con ese recaudo, el contraste es claro: la física
-embebida es la única familia que mostró señal de extrapolación \textit{zero-shot}, y cada
-pieza de física correcta que se incorporó (el término de gas libre, la compresibilidad
+ajeno a todo el ciclo de desarrollo. Aun con ese recaudo, la física embebida fue la única
+familia de modelos que mostró algo de extrapolación \textit{zero-shot}, y observamos que
+cada elemento físico que fuimos agregando durante el desarrollo (el gas que se libera
+debajo del punto de burbuja, la compresibilidad
 dependiente de la presión) mejoró la generalización entre campos.
 
 % ============================================================
@@ -1598,22 +1613,27 @@ El trabajo deja varias líneas abiertas, tanto del lado del modelo como de la ap
 \subsection{Física embebida (PINN de balance de materiales)}
 
 El PINN de balance de materiales evaluado en la sección~\ref{sec:pinn} concretó el uso de
-PINNs que se anticipa en el estado del arte y dejó un mapa claro de lo que sigue. El techo
-de Volve es estructural: el tanque 0-D no puede representar un campo heterogéneo cuya
-presión sube por encima de la inicial. Las extensiones naturales son un término de
-acuífero con forma física (van Everdingen-Hurst) como entrada adicional de la corrección
-neuronal, y a más largo plazo física espacial (la ecuación de difusividad en lugar del
-tanque).
+PINNs que se anticipa en el estado del arte, y los resultados marcan qué conviene hacer a
+continuación. El límite que se observa en Volve viene del propio modelo de tanque: al
+tratar al yacimiento como un único depósito sin dimensión espacial, no puede representar
+un campo heterogéneo cuya presión sube por encima de la inicial. Las extensiones
+naturales son agregar un término de aporte de acuífero con la forma del modelo clásico de
+van Everdingen-Hurst como entrada adicional de la corrección neuronal y, a más largo
+plazo, pasar a una formulación con dimensión espacial (la ecuación de difusividad en
+lugar del tanque).
 
-Hay además dos líneas exploradas de forma preliminar que merecen desarrollo. La primera es
-el \textit{fine-tuning} anclado de la corrección neuronal durante la calibración
-\textit{few-shot} (hoy la red queda congelada): en pruebas exploratorias rompe el techo de
-Volve (de $\approx 0.39$ a $0.64$--$0.78$ según la cantidad de simulaciones de
-calibración). La segunda apunta al \textit{zero-shot}: el mecanismo de empuje de un campo
-no está contenido en sus entradas actuales, así que mejorarlo requiere una población más
-diversa de campos sintéticos y descriptores conocibles antes de producir (presencia de
-acuífero, ensayos de pozo). Por último, el ensemble de semillas ya disponible permite
-acompañar cada predicción con una banda de incertidumbre.
+Hay además dos líneas que exploramos de forma preliminar y que valdría la pena
+desarrollar. La primera es permitir que la red también se reajuste durante la calibración
+\textit{few-shot}, de forma controlada (hoy queda congelada y solo se reajustan los
+parámetros físicos): en pruebas exploratorias, esto llevó el $R^2$ de Volve de valores
+cercanos a $0.4$ hasta $0.64$--$0.78$ según la cantidad de simulaciones de calibración.
+La segunda apunta al \textit{zero-shot}: el mecanismo que sostiene la presión de un campo
+(un acuífero, la inyección) no se puede deducir de las entradas actuales del modelo, así
+que mejorar la predicción sin datos del campo requiere entrenar con una población más
+diversa de campos sintéticos y sumar variables que se conocen antes de producir (la
+presencia de un acuífero, los ensayos de pozo). Por último, como ya entrenamos el modelo
+con varias semillas, se puede usar ese conjunto para acompañar cada predicción con una
+banda de incertidumbre.
 
 \subsection{Calibración few-shot}
 
@@ -1664,17 +1684,18 @@ entre reservorios con propiedades similares (Norne y Volve). Sin embargo, el mod
 de extrapolar las predicciones a reservorios con propiedades distintas a las de los reservorios
 utilizados como datos de entrenamiento (en este caso, el modelo de reservorio SPE9).
 
-Ese límite del enfoque puramente \textit{data-driven} motivó la pieza final del trabajo:
-embeber la física en el modelo. El PINN de balance de materiales fue el único modelo con
-señal de extrapolación \textit{zero-shot}, con un $R^2$ global positivo sobre SPE9 donde
-todas las familias \textit{data-driven} dan resultados negativos, y cada pieza de física
-correcta que se incorporó (el término de gas libre, la compresibilidad dependiente de la
-presión, la corrección neuronal acotada) mejoró la generalización entre campos. Además,
-la calibración \textit{few-shot} mostró que con muy pocos datos del campo nuevo alcanza
-para recuperar el desempeño: ajustando dos parámetros físicos interpretables con una a
-tres simulaciones, el PINN llega a un $R^2$ de $0.90$ a $0.95$ en el campo que ningún
-modelo resolvía sin datos. El modo de uso realista del sistema, entonces, no es la
-generalización perfecta sin datos, sino calibrar con poca información del campo objetivo.
+Ese límite del enfoque puramente \textit{data-driven} motivó la última parte del
+trabajo: incorporar la física al modelo. El PINN de balance de materiales fue el único
+modelo que mostró algo de extrapolación a un campo sin datos, con un $R^2$ global
+positivo sobre SPE9 donde todas las familias \textit{data-driven} dan resultados
+negativos, y observamos que cada elemento físico que fuimos agregando durante su
+desarrollo (el gas que se libera debajo del punto de burbuja, la compresibilidad
+dependiente de la presión, la corrección neuronal acotada) mejoró la generalización
+entre campos. Además, con muy pocos datos del campo nuevo alcanza para recuperar el
+desempeño: reajustando dos parámetros físicos con una a tres simulaciones, el PINN llega
+a un $R^2$ de $0.90$ a $0.95$ en el campo que ningún modelo resolvía sin datos. En la
+práctica, entonces, conviene usar el sistema calibrándolo con la poca información que
+haya del campo objetivo, en lugar de esperar que generalice sin ningún dato.
 
 En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
 la industria, se materializó por completo. La viabilidad del proyecto dependió de la
