@@ -1664,6 +1664,18 @@ entre reservorios con propiedades similares (Norne y Volve). Sin embargo, el mod
 de extrapolar las predicciones a reservorios con propiedades distintas a las de los reservorios
 utilizados como datos de entrenamiento (en este caso, el modelo de reservorio SPE9).
 
+Ese límite del enfoque puramente \textit{data-driven} motivó la pieza final del trabajo:
+embeber la física en el modelo. El PINN de balance de materiales fue el único modelo con
+señal de extrapolación \textit{zero-shot}, con un $R^2$ global positivo sobre SPE9 donde
+todas las familias \textit{data-driven} dan resultados negativos, y cada pieza de física
+correcta que se incorporó (el término de gas libre, la compresibilidad dependiente de la
+presión, la corrección neuronal acotada) mejoró la generalización entre campos. Además,
+la calibración \textit{few-shot} mostró que con muy pocos datos del campo nuevo alcanza
+para recuperar el desempeño: ajustando dos parámetros físicos interpretables con una a
+tres simulaciones, el PINN llega a un $R^2$ de $0.90$ a $0.95$ en el campo que ningún
+modelo resolvía sin datos. El modo de uso realista del sistema, entonces, no es la
+generalización perfecta sin datos, sino calibrar con poca información del campo objetivo.
+
 En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
 la industria, se materializó por completo. La viabilidad del proyecto dependió de la
 capacidad de adaptación: el paso de esperar datos reales a generarlos con un simulador
