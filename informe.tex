@@ -1565,33 +1565,39 @@ El trabajo deja varias líneas abiertas, tanto del lado del modelo como de la ap
 
 \subsection{Física embebida (PINN de balance de materiales)}
 
-La experimentación mostró que ningún modelo generaliza bien a un campo cuyo régimen no vio
-durante el entrenamiento, como pasó con SPE9, que cruza el punto de burbuja y libera gas.
-Una salida es dejar de aprender todo desde los datos y meter la física adentro del modelo.
-La ecuación de balance de materiales describe cómo cae la presión a medida que se produce e
-inyecta fluido; usada como esqueleto del modelo, es ella la que carga con la extrapolación
-a un campo nuevo.
+El PINN de balance de materiales evaluado en la sección~\ref{sec:pinn} concretó el uso de
+PINNs que se anticipa en el estado del arte y dejó un mapa claro de lo que sigue. El techo
+de Volve es estructural: el tanque 0-D no puede representar un campo heterogéneo cuya
+presión sube por encima de la inicial. Las extensiones naturales son un término de
+acuífero con forma física (van Everdingen-Hurst) como entrada adicional de la corrección
+neuronal, y a más largo plazo física espacial (la ecuación de difusividad en lugar del
+tanque).
 
-Las exploraciones preliminares en esta dirección son alentadoras: una versión basada en un
-modelo de tanque, con un solo parámetro físico ajustable, generaliza a un campo no visto
-donde los modelos puramente data-driven daban $R^2$ negativo. Sumar el término de gas libre
-($B_g$) ayuda además en el régimen que cruza el punto de burbuja. El paso siguiente es
-desarrollar esto como un PINN completo, que combine la ecuación física con una corrección
-aprendida, y evaluarlo bajo el mismo protocolo \textit{leave-one-field-out}. Esta línea
-también concreta el uso de PINNs que se anticipa en el estado del arte.
+Hay además dos líneas exploradas de forma preliminar que merecen desarrollo. La primera es
+el \textit{fine-tuning} anclado de la corrección neuronal durante la calibración
+\textit{few-shot} (hoy la red queda congelada): en pruebas exploratorias rompe el techo de
+Volve (de $\approx 0.39$ a $0.64$--$0.78$ según la cantidad de simulaciones de
+calibración). La segunda apunta al \textit{zero-shot}: el mecanismo de empuje de un campo
+no está contenido en sus entradas actuales, así que mejorarlo requiere una población más
+diversa de campos sintéticos y descriptores conocibles antes de producir (presencia de
+acuífero, ensayos de pozo). Por último, el ensemble de semillas ya disponible permite
+acompañar cada predicción con una banda de incertidumbre.
 
 \subsection{Calibración few-shot}
 
-Los experimentos de cobertura dejaron una observación clara: la predicción \textit{zero-shot}
-a un campo nuevo falla por el cambio de dominio, pero alcanza con muy pocos datos del campo
-nuevo para corregirlo. Agregar una sola simulación del campo objetivo al entrenamiento lleva
-el $R^2$ de alrededor de 0,14 a 0,89.
+La experimentación dejó una observación clara: la predicción \textit{zero-shot} a un campo
+nuevo falla por el cambio de dominio, pero alcanza con muy pocos datos del campo nuevo
+para corregirlo. En el caso del PINN (sección~\ref{sec:pinn}), calibrar dos parámetros
+físicos con una sola simulación del campo objetivo lleva el $R^2$ de SPE9 a $0.90$, y con
+tres simulaciones a $0.95$.
 
-En lugar de perseguir una generalización \textit{zero-shot} perfecta, conviene diseñar un
-flujo de calibración: ante un yacimiento nuevo, conseguir un puñado de simulaciones (o algo
-de datos reales) y reajustar el modelo. Queda por cuantificar cuántas corridas hacen falta
-para alcanzar una precisión objetivo. La implicancia práctica es que baja la barrera de
-datos para usar la herramienta en un campo que no estaba representado.
+En lugar de perseguir una generalización \textit{zero-shot} perfecta, conviene entonces
+diseñar un flujo de calibración: ante un yacimiento nuevo, conseguir un puñado de
+simulaciones (o algo de datos reales) y reajustar el modelo. El paso siguiente es llevar
+ese flujo a un escenario más realista todavía: calibrar con puntos sueltos de presión
+medida (como los que dejan las campañas de medición en pozos) en lugar de historias
+completas. La implicancia práctica es que baja la barrera de datos para usar la
+herramienta en un campo que no estaba representado.
 
 \subsection{Más campos y datos reales}
 
