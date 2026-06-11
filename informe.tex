@@ -187,8 +187,15 @@ rápidas, robustas y escalables.
 
 Este proyecto consiste en el desarrollo de un sistema para estimar la presión de yacimientos de petróleo,
 basado en técnicas de \textit{Data Analytics} y \textit{Machine Learning}.
-La solución integra un modelo predictivo que consume y procesa datos físicos del reservorio, junto con una interfaz web que 
+La solución integra un modelo predictivo que consume y procesa datos físicos del reservorio, junto con una interfaz web que
 facilita su uso por parte de ingenieros sin formación específica en ciencia de datos.
+
+La experimentación sobre tres campos sintéticos mostró que los modelos puramente
+\textit{data-driven} no generalizan a un yacimiento de régimen no visto. Frente a eso, el
+proyecto desarrolló y validó además un modelo de física embebida, una red neuronal
+informada por la ecuación de balance de materiales (PINN), que mostró la única señal de
+extrapolación a un campo nuevo y que, calibrado con muy pocas simulaciones del campo
+objetivo, recupera la capacidad predictiva.
 
 
 % ============================================================
@@ -197,7 +204,7 @@ facilita su uso por parte de ingenieros sin formación específica en ciencia de
 \newpage
 \section{Palabras clave}
 
-Yacimiento de petróleo, machine learning, estimación de presión, física de reservorio, recuperación secundaria.
+Yacimiento de petróleo, machine learning, estimación de presión, física de reservorio, recuperación secundaria, redes neuronales informadas por la física (PINN).
 
 % ============================================================
 % 5. ABSTRACT
@@ -214,13 +221,20 @@ This project consists of the development of a system to estimate the pressure of
 based on \textit{Data Analytics} and \textit{Machine Learning} techniques.
 The solution integrates a predictive model that processes reservoir data, along with a web interface designed for engineers without data science expertise.
 
+Experimentation on three synthetic fields showed that purely data-driven models do not
+generalize to a reservoir whose regime was never seen during training. To address this,
+the project also developed and validated a physics-embedded model, a neural network
+informed by the material balance equation (PINN), which showed the only sign of
+extrapolation to a new field and which, calibrated with very few simulations of the
+target field, recovers predictive performance.
+
 % ============================================================
 % 6. KEYWORDS
 % ============================================================
 \newpage
 \section{Keywords}
 
-Oil reservoir, machine learning, pressure estimation, reservoir physics, secondary recovery.
+Oil reservoir, machine learning, pressure estimation, reservoir physics, secondary recovery, physics-informed neural networks (PINN).
 
 % ============================================================
 % 7. AGRADECIMIENTOS (OPCIONAL)
@@ -376,7 +390,7 @@ predicho sino también el grado de confianza del modelo.
 
 \subsection{Arquitectura}
 
-El sistema está compuesto una aplicación web (frontend y backend) y un modelo de machine learning.
+El sistema está compuesto por una aplicación web (frontend y backend) y un modelo de machine learning.
 
 \begin{figure}[H]
   \centering
@@ -419,15 +433,16 @@ Además, la aplicación está diseñada con una arquitectura modular que separa 
 El objetivo del modelo es predecir, a lo largo del tiempo, la presión promedio del reservorio a partir de datos operativos
 y de las propiedades del fluido.
 
-Para este proyecto utilizamos un modelo de tipo LSTM (Long Short-Term Memory).
-Para la elección del mismo, se realizaron múltiples pruebas con distintos modelos:
-regresión lineal, random forests, XGBoost y series de tiempo.
-Sin embargo, nos decantamos por LSTM ya que resultó ser el que generaliza de forma más
-robusta y pareja entre reservorios distintos.
+La aplicación sirve por defecto un modelo de tipo LSTM (Long Short-Term Memory) de la
+línea secuencial con codificación de PVT, elegido por su manejo nativo de la secuencia
+temporal completa de cada simulación. El módulo de predicción tiene además una
+arquitectura enchufable: detrás de una misma interfaz conviven los distintos modelos
+desarrollados durante la experimentación (regresión lineal regularizada, XGBoost y el
+modelo de física embebida), y el modelo a servir se selecciona por configuración.
 
 En la sección \ref{sec:experimentacion} se detalla el procedimiento de entrenamiento y
-validación de cada modelo evaluado, junto con la comparación de resultados que motivó la
-elección del LSTM como modelo final.
+validación de cada modelo evaluado, junto con la comparación de resultados entre las
+distintas familias de modelo.
 
 \paragraph{Esquema de datos}
 
@@ -1653,19 +1668,26 @@ la elección entre Ridge, XGBoost o LSTM. Con el target anclado, hasta los model
 árboles transfieren parcialmente a un campo no visto; sin el anclaje, ninguna familia lo
 logra. A igual representación, ningún modelo transfiere de verdad a los tres campos:
 XGBoost resultó el más estable, y el LSTM conservó la mejor parte de su transferencia en
-Volve. La aplicación web sirve el modelo LSTM de la línea secuencial con codificación de
-PVT, desarrollado en la experimentación con Norne y Volve.
+Volve. La aplicación web puede servir varios de los modelos desarrollados detrás de una
+interfaz común, y sirve por defecto el LSTM de la línea secuencial con codificación de
+PVT.
 
 El experimento \textit{leave-one-field-out} marcó además el límite del enfoque puramente
 \textit{data-driven}: ningún modelo extrapola a un régimen termodinámico que no vio
 durante el entrenamiento, como pasa con SPE9, cuya presión cruza el punto de burbuja y
 libera gas. La física que no está en los datos de entrenamiento no se puede interpolar.
-Hay dos salidas: incorporarla al modelo, que es la línea de física embebida y PINNs que
-se desarrolla en Trabajos Futuros, o compensarla con datos del campo objetivo. Sobre esta
-segunda, los experimentos de cobertura indican que con muy pocas simulaciones del campo
-nuevo alcanza para recuperar el desempeño mediante calibración. El modo de uso realista
-del sistema, entonces, no es la generalización perfecta sin datos, sino calibrar con poca
-información del campo objetivo.
+Hay dos salidas: incorporarla al modelo o compensarla con datos del campo objetivo, y
+ambas se pusieron a prueba en este trabajo. Sobre la primera, el PINN de balance de
+materiales fue el único modelo con señal de extrapolación \textit{zero-shot}: un $R^2$
+global positivo sobre SPE9 con las tres semillas de entrenamiento, donde todas las
+familias \textit{data-driven} dan resultados negativos. Cada pieza de física correcta que
+se incorporó al modelo (el término de gas libre, la compresibilidad dependiente de la
+presión, la corrección neuronal acotada) mejoró la generalización entre campos. Sobre la
+segunda, la calibración \textit{few-shot} indica que con muy pocas simulaciones del campo
+nuevo alcanza para recuperar el desempeño: ajustando dos parámetros físicos interpretables
+con una a tres simulaciones, el PINN llega a un $R^2$ de $0.90$ a $0.95$ en el campo que
+ningún modelo resolvía sin datos. El modo de uso realista del sistema, entonces, no es la
+generalización perfecta sin datos, sino calibrar con poca información del campo objetivo.
 
 En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
 la industria, se materializó por completo. La viabilidad del proyecto dependió de la
