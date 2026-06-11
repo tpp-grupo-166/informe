@@ -1135,31 +1135,25 @@ reservorio no visto. Los demás modelos alcanzan métricas muy buenas in-distrib
 Norne pero colapsan al evaluar sobre Volve, mientras que Random Forest y LSTM mantienen un R² positivo y
 un MAE varios órdenes de magnitud menor en el split cross-reservoir.
 
-\subsection{Validación de generalización multi-campo (leave-one-field-out)}
+\subsection{Validación de generalización multi-campo (leave-one-out)}
 \label{sec:lofo}
 
 La comparación anterior entrena con un único campo (Norne) y evalúa la transferencia a un
 segundo campo (Volve). Para poner a prueba la generalización de forma más exigente,
 realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}~\cite{spe9}, y
-adopta un protocolo de \textit{leave-one-field-out}: para cada campo objetivo, el modelo se
+adopta un protocolo de \textit{leave-one-out}: para cada campo objetivo, el modelo se
 entrena con los otros dos campos completos y predice el campo que nunca vio.
 
 Los tres campos utilizados son Volve (10 simulaciones), Norne (30) y SPE9 (100). Para que
 la comparación entre familias de modelo sea justa, los tres reciben exactamente la misma
 entrada: el mismo conjunto de features adimensionales, construido únicamente con
-producción, inyección y propiedades estáticas (normalizadas por el pore-volume, sin
-ninguna variable derivada de la serie de presión, ni lags ni derivadas, y descartando
-$B_o$, $B_g$ y $R_s$ por su dependencia directa de la
-presión), y el mismo objetivo anclado a la presión inicial ($\Delta = P - P_{init}$, del que
-se reconstruye $P = P_{init} + \widehat{\Delta}$). Anclar a $P_{init}$ es lo que permite
-comparar campos con niveles de presión distintos: sin este anclaje, los tres modelos arrojan
-$R^2$ negativo en todos los campos.
+producción, inyección y propiedades estáticas.
 
 Se comparan tres familias: Ridge (lineal regularizado), XGBoost (árboles con boosting) y
-LSTM (red recurrente). El LSTM se entrena con tres semillas de inicialización y se reporta
+LSTM (red recurrente). El LSTM se entrena con tres seeds de inicialización y se reporta
 media $\pm$ desvío. Cabe aclarar que el LSTM evaluado en este experimento es una versión
 genérica sobre las mismas features, que no incorpora el encoder de PVT descrito
-anteriormente; por lo tanto, sus métricas aquí constituyen una cota inferior de su
+anteriormente; por lo tanto, las métricas en este caso pueden interpretarse como una cota inferior de su
 rendimiento real.
 
 \begin{table}[H]
@@ -1179,10 +1173,10 @@ R² medio & -16.55 & -0.32 & -0.44 \\
 R² mediano por simulación & -19.45 & -0.62 & -0.75 \\
 \hline
 \end{tabular}
-\caption{Generalización entre campos (leave-one-field-out). Cada fila es un campo no visto
+\caption{Generalización entre campos (leave-one-out). Cada fila es un campo no visto
 durante el entrenamiento. El $R^2$ mediano por simulación es más exigente: obliga a seguir la
 trayectoria de cada corrida, no sólo el nivel promedio del campo. La columna LSTM reporta
-media $\pm$ desvío sobre tres semillas de inicialización.}
+media $\pm$ desvío sobre tres seeds de inicialización.}
 \label{tab:lofo}
 \end{table}
 
@@ -1192,35 +1186,28 @@ De este experimento se desprenden varias observaciones:
   \item \textbf{XGBoost es el más estable y el único con transferencia parcial.} Queda en
   positivo en los dos campos de régimen parecido al de entrenamiento (Volve $+0.63$, Norne
   $+0.27$), aunque con un $R^2$ mediano por simulación modesto en Norne ($+0.16$): acompaña
-  el nivel de presión más que la trayectoria fina. A diferencia de lo observado en el
-  experimento anterior, los modelos de árboles \textit{sí} logran transferir parcialmente a
-  un campo no visto cuando reciben el target anclado a $P_{init}$.
+  el nivel de presión más que la trayectoria precisa.
 
   \item \textbf{El LSTM conserva la transferencia en Volve.} Su resultado en Volve es
-  genuino y parejo entre semillas ($+0.54 \pm 0.04$); en Norne, en cambio, la media queda en
-  cero con un desvío grande entre semillas (de $-0.27$ a $+0.33$). Una corrida única podía
+  genuino y parejo entre seeds ($+0.54 \pm 0.04$). Sin embargo, en Norne, la media queda en
+  cero con un desvío grande entre seeds (de $-0.27$ a $+0.33$). Una corrida única podía
   dar un resultado bueno o malo por azar de la inicialización; por eso se reporta media
   $\pm$ desvío.
 
-  \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola sin freno
-  fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne. Es
-  la contracara del comportamiento de los árboles: estos fallan por no extrapolar; lo
-  lineal, por extrapolar de más.
+  \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola de más
+  fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne.
 
-  \item \textbf{Ningún modelo resuelve SPE9.} Es el campo más distinto de los tres (su
-  presión cruza el punto de burbuja y libera gas, un régimen ausente en el entrenamiento) y
-  los tres modelos dan un $R^2$ negativo, tanto global como por simulación. La física que
-  no está en los datos de entrenamiento no se interpola.
+  \item \textbf{Ningún modelo resuelve SPE9.} SPE9 es el modelo de campo más distinto de los tres (su
+  presión cruza el punto de burbuja y libera gas, una propiedad que no está presente en los datos de entrenamiento) y
+  los tres modelos dan un $R^2$ negativo, tanto global como por simulación.
 \end{itemize}
 
 La conclusión central de este experimento es que el factor que determina la transferencia no
-es tanto la familia de modelo (Ridge vs. XGBoost vs. LSTM) sino dos elementos metodológicos:
-\textbf{anclar la predicción a $P_{init}$} y \textbf{contar con cobertura de dominio}, esto
-es, que el entrenamiento incluya algún campo de régimen parecido al campo objetivo. Aun
+es tanto la familia de modelo (Ridge vs. XGBoost vs. LSTM) sino \textbf{contar con cobertura de dominio},
+es decir, que el entrenamiento incluya algún campo de régimen parecido al campo objetivo. Aun
 así, la transferencia es parcial: solo XGBoost queda en positivo en los dos campos de
 régimen parecido (Volve, Norne), y ningún modelo transfiere a un régimen que nunca vio
-(SPE9, que cruza el punto de burbuja). Sin información del campo objetivo, ningún modelo
-puramente \textit{data-driven} generaliza de verdad.
+(SPE9, que cruza el punto de burbuja).
 
 \subsection{Física embebida: PINN de balance de materiales}
 \label{sec:pinn}
@@ -1656,7 +1643,7 @@ obtenidas con datos sintéticos se sostienen frente a datos de campo.
 El modelo que sirve hoy la aplicación usa un encoder que comprime la tabla PVT junto con
 features de superficie. Una mejora natural es migrar esas features a balance de materiales
 (voidage neto), que son más físicas y transfieren mejor entre campos. También conviene
-mostrar la incertidumbre de la predicción como media y desvío sobre varias semillas, en
+mostrar la incertidumbre de la predicción como media y desvío sobre varias seeds, en
 lugar de una corrida única, y avanzar hacia un despliegue, ya que por ahora la aplicación
 corre solo en entorno local.
 
