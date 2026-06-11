@@ -647,7 +647,7 @@ como la presión, caudales de inyección y producción, en función del tiempo.
 A partir del análisis exploratorio del dataset, encontramos que los reservorios de Volve y Norne
 operan en rangos muy distintos de presión, caudales de producción y volúmenes acumulados, lo cual
 era esperable dado que se trata de campos de tamaños muy diferentes (Norne es aproximadamente 6 veces
-mas grande que Volve). Esto nos llevó a aplicar varias normalizaciones a los datos antes de pasarlos al modelo.
+más grande que Volve). Esto nos llevó a aplicar varias normalizaciones a los datos antes de pasarlos al modelo.
 
 La primera fue dividir las cantidades dependientes del tamaño del campo (producciones acumuladas,
 caudales de producción e inyección) por el pore-volume del reservorio, que es el volumen total que
@@ -830,7 +830,7 @@ de los resultados:
     \item \textbf{NumPy y Pandas}: utilizadas para la manipulación y procesamiento de los
     datasets en formato CSV.
     
-    \item \textbf{Matplotlib}: utilizada crear visualizaciones, tanto para el análisis exploratorio
+    \item \textbf{Matplotlib}: utilizada para crear visualizaciones, tanto para el análisis exploratorio
     como para los resultados de los distintos modelos.
 
     \item \textbf{resdata}~\cite{resdata}: librería de Python utilizada para parsear los archivos de salida
@@ -858,9 +858,9 @@ paralelizar la generación del dataset sin conflictos entre simulaciones concurr
 \label{sec:experimentacion}
 
 Durante el entrenamiento de los modelos se realizaron múltiples pruebas para validar la efectividad de los mismos,
-compararlos, y decidir cuál utilizar en el proyecto:
+compararlos, y decidir cuál utilizar en el proyecto.
 
-Dado que contamos con dos modelos de reservorio (Norne y Volve), esto nos permitió validar
+Dado que contamos con dos modelos de reservorio (Norne y Volve), pudimos validar
 que el modelo es capaz de generalizar entre reservorios distintos. En este contexto, realizamos
 dos tipos de pruebas:
 
@@ -935,7 +935,7 @@ sino establecer una cota inferior empírica contra la cual comparar los modelos 
 \end{figure}
 
 A partir de los valores del coeficiente de determinación ($0.959$ para Norne, $-891.87$ para Volve), 
-se puede deducir que claramente el modelo overfittea para los datos de entrenamiento, y no logra
+se puede deducir que claramente el modelo overfittea sobre los datos de entrenamiento, y no logra
 extrapolar la predicción para reservorios con una distribución distinta a la de Norne.
 
 
@@ -994,7 +994,7 @@ de 101.69 psi y RMSE de 135.32 psi.
 
 \subsubsection{XGBoost}
 
-El siguiente modelo a evaluar es XGBoost, es un modelo de árboles un poco más complejo,
+El siguiente modelo a evaluar es XGBoost, un modelo de árboles un poco más complejo,
 que en general supera a Random Forest en problemas tabulares.
 
 \begin{table}[ht]
@@ -1204,8 +1204,8 @@ De este experimento se desprenden varias observaciones:
 
   \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola sin freno
   fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne. Es
-  la contracara del comportamiento de los árboles: estos fallan por no extrapolar, lo
-  lineal por extrapolar de más.
+  la contracara del comportamiento de los árboles: estos fallan por no extrapolar; lo
+  lineal, por extrapolar de más.
 
   \item \textbf{Ningún modelo resuelve SPE9.} Es el campo más distinto de los tres (su
   presión cruza el punto de burbuja y libera gas, un régimen ausente en el entrenamiento) y
@@ -1519,7 +1519,7 @@ escasez de datos reales de presión. Este riesgo se materializó durante el prim
 se mantuvo durante el segundo cuatrimestre.
 
 El equipo esperaba contar con datos provistos por PAE, sin embargo, debido a que el trabajo
-debía ser de caracter publico, no fue posible acceder a dichos datos.
+debía ser de carácter público, no fue posible acceder a dichos datos.
 
 Esta situación implicó un período prolongado de espera e incertidumbre, lo que impactó
 directamente en la planificación inicial y retrasó el avance del proyecto, particularmente en
@@ -1608,7 +1608,7 @@ del agua y la energía.
 
 El trabajo deja varias líneas abiertas, tanto del lado del modelo como de la aplicación.
 
-\subsection{Probar modelos informados por física (PINN de balance de materiales)}
+\subsection{Física embebida (PINN de balance de materiales)}
 
 El PINN de balance de materiales evaluado en la sección~\ref{sec:pinn} concretó el uso de
 PINNs que se anticipa en el estado del arte y dejó un mapa claro de lo que sigue. El techo
