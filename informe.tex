@@ -16,6 +16,7 @@
 \usepackage{pgfgantt}
 \usepackage{array}
 \usepackage{etoolbox}
+\usepackage{subcaption}
 
 % Hacer que la sección de Referencias quede numerada.
 % Por defecto, thebibliography la emite con \section* (sin número).
@@ -156,7 +157,7 @@
 
 
 \bigskip
-En Buenos Aires a [día] de [mes] del año [año] se reúnen Dr. Hernán Merlino 
+En Buenos Aires a 10 de junio del año 2026 se reúnen Dr. Hernán Merlino 
 con los estudiantes de la carrera de Ingeniería en Informática: Franco Julián Bragantini,
 Máximo Palopoli, Mateo Julián Rico y Alan Valdevenito.
 El objetivo de la reunión es revisar el Informe Final del Trabajo Profesional de Ingeniería en Informática.
@@ -167,11 +168,43 @@ proyecto y avala el documento presentado como Informe Final, tanto en su complet
 
 \vspace{1.5cm}
 
-Firma y aclaración del director: [firma y aclaración]
+Firma y aclaración del director:
 
-\vspace{3cm}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.2\textwidth]{img/firmas/hernan.jpeg}\\
+  \small Hernán Merlino
+\end{figure}
 
-Firmas y aclaraciones de los estudiantes: [firmas y aclaraciones]
+
+\vspace{1cm}
+
+Firmas y aclaraciones de los estudiantes: 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/template.png}\\
+        \small Franco Bragantini
+    \end{subfigure}
+    \hspace{3cm}
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/template.png}\\
+        \small Máximo Palopoli
+    \end{subfigure}
+
+    \vspace{0.5cm}
+
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/mateo.png}\\
+        \small Mateo Rico
+    \end{subfigure}
+    \hspace{3cm}
+    \begin{subfigure}{0.2\textwidth}
+        \includegraphics[width=\textwidth]{img/firmas/template.png}\\
+        \small Alan Valdevenito
+    \end{subfigure}
+\end{figure}
 
 % ============================================================
 % 3. RESUMEN
