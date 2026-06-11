@@ -220,8 +220,16 @@ rápidas, robustas y escalables.
 
 Este proyecto consiste en el desarrollo de un sistema para estimar la presión de yacimientos de petróleo,
 basado en técnicas de \textit{Data Analytics} y \textit{Machine Learning}.
-La solución integra un modelo predictivo que consume y procesa datos físicos del reservorio, junto con una interfaz web que 
+La solución integra un modelo predictivo que consume y procesa datos físicos del reservorio, junto con una interfaz web que
 facilita su uso por parte de ingenieros sin formación específica en ciencia de datos.
+
+La experimentación sobre tres campos sintéticos mostró que los modelos puramente
+\textit{data-driven} (los que aprenden todo desde los datos) no generalizan a un
+yacimiento de régimen no visto. Frente a eso, el
+proyecto desarrolló y validó además un modelo de física embebida, una red neuronal
+informada por la ecuación de balance de materiales (PINN), que mostró la única señal de
+extrapolación a un campo nuevo y que, calibrado con muy pocas simulaciones del campo
+objetivo, recupera la capacidad predictiva.
 
 
 % ============================================================
@@ -230,7 +238,7 @@ facilita su uso por parte de ingenieros sin formación específica en ciencia de
 \newpage
 \section{Palabras clave}
 
-Yacimiento de petróleo, machine learning, estimación de presión, física de reservorio, recuperación secundaria.
+Yacimiento de petróleo, machine learning, estimación de presión, física de reservorio, recuperación secundaria, redes neuronales informadas por la física (PINN).
 
 % ============================================================
 % 5. ABSTRACT
@@ -247,13 +255,20 @@ This project consists of the development of a system to estimate the pressure of
 based on \textit{Data Analytics} and \textit{Machine Learning} techniques.
 The solution integrates a predictive model that processes reservoir data, along with a web interface designed for engineers without data science expertise.
 
+Experimentation on three synthetic fields showed that purely data-driven models do not
+generalize to a reservoir whose regime was never seen during training. To address this,
+the project also developed and validated a physics-embedded model, a neural network
+informed by the material balance equation (PINN), which showed the only sign of
+extrapolation to a new field and which, calibrated with very few simulations of the
+target field, recovers predictive performance.
+
 % ============================================================
 % 6. KEYWORDS
 % ============================================================
 \newpage
 \section{Keywords}
 
-Oil reservoir, machine learning, pressure estimation, reservoir physics, secondary recovery.
+Oil reservoir, machine learning, pressure estimation, reservoir physics, secondary recovery, physics-informed neural networks (PINN).
 
 % ============================================================
 % 7. AGRADECIMIENTOS (OPCIONAL)
@@ -407,7 +422,7 @@ predicho sino también el grado de confianza del modelo.
 
 \subsection{Arquitectura}
 
-El sistema está compuesto una aplicación web (frontend y backend) y un modelo de machine learning.
+El sistema está compuesto por una aplicación web (frontend y backend) y un modelo de machine learning.
 
 \begin{figure}[H]
   \centering
@@ -464,15 +479,16 @@ Además, la aplicación está diseñada con una arquitectura modular que separa 
 El objetivo del modelo es predecir, a lo largo del tiempo, la presión promedio del reservorio a partir de datos operativos
 y de las propiedades del fluido.
 
-Para este proyecto utilizamos un modelo de tipo LSTM (Long Short-Term Memory).
-Para la elección del mismo, se realizaron múltiples pruebas con distintos modelos:
-regresión lineal, random forests, XGBoost y series de tiempo.
-Sin embargo, nos decantamos por LSTM ya que resultó ser el que generaliza de forma más
-robusta y pareja entre reservorios distintos.
+La aplicación sirve por defecto un modelo de tipo LSTM (Long Short-Term Memory) de la
+línea secuencial con codificación de PVT, elegido por su manejo nativo de la secuencia
+temporal completa de cada simulación. El módulo de predicción tiene además una
+arquitectura enchufable: detrás de una misma interfaz conviven los distintos modelos
+desarrollados durante la experimentación (regresión lineal regularizada, XGBoost y el
+modelo de física embebida), y el modelo a servir se selecciona por configuración.
 
 En la sección \ref{sec:experimentacion} se detalla el procedimiento de entrenamiento y
-validación de cada modelo evaluado, junto con la comparación de resultados que motivó la
-elección del LSTM como modelo final.
+validación de cada modelo evaluado, junto con la comparación de resultados entre las
+distintas familias de modelo.
 
 \paragraph{Esquema de datos}
 
@@ -632,7 +648,7 @@ como la presión, caudales de inyección y producción, en función del tiempo.
 A partir del análisis exploratorio del dataset, encontramos que los reservorios de Volve y Norne
 operan en rangos muy distintos de presión, caudales de producción y volúmenes acumulados, lo cual
 era esperable dado que se trata de campos de tamaños muy diferentes (Norne es aproximadamente 6 veces
-mas grande que Volve). Esto nos llevó a aplicar varias normalizaciones a los datos antes de pasarlos al modelo.
+más grande que Volve). Esto nos llevó a aplicar varias normalizaciones a los datos antes de pasarlos al modelo.
 
 La primera fue dividir las cantidades dependientes del tamaño del campo (producciones acumuladas,
 caudales de producción e inyección) por el pore-volume del reservorio, que es el volumen total que
@@ -815,7 +831,7 @@ de los resultados:
     \item \textbf{NumPy y Pandas}: utilizadas para la manipulación y procesamiento de los
     datasets en formato CSV.
     
-    \item \textbf{Matplotlib}: utilizada crear visualizaciones, tanto para el análisis exploratorio
+    \item \textbf{Matplotlib}: utilizada para crear visualizaciones, tanto para el análisis exploratorio
     como para los resultados de los distintos modelos.
 
     \item \textbf{resdata}~\cite{resdata}: librería de Python utilizada para parsear los archivos de salida
@@ -843,9 +859,9 @@ paralelizar la generación del dataset sin conflictos entre simulaciones concurr
 \label{sec:experimentacion}
 
 Durante el entrenamiento de los modelos se realizaron múltiples pruebas para validar la efectividad de los mismos,
-compararlos, y decidir cuál utilizar en el proyecto:
+compararlos, y decidir cuál utilizar en el proyecto.
 
-Dado que contamos con dos modelos de reservorio (Norne y Volve), esto nos permitió validar
+Dado que contamos con dos modelos de reservorio (Norne y Volve), pudimos validar
 que el modelo es capaz de generalizar entre reservorios distintos. En este contexto, realizamos
 dos tipos de pruebas:
 
@@ -920,7 +936,7 @@ sino establecer una cota inferior empírica contra la cual comparar los modelos 
 \end{figure}
 
 A partir de los valores del coeficiente de determinación ($0.959$ para Norne, $-891.87$ para Volve), 
-se puede deducir que claramente el modelo overfittea para los datos de entrenamiento, y no logra
+se puede deducir que claramente el modelo overfittea sobre los datos de entrenamiento, y no logra
 extrapolar la predicción para reservorios con una distribución distinta a la de Norne.
 
 
@@ -979,7 +995,7 @@ de 101.69 psi y RMSE de 135.32 psi.
 
 \subsubsection{XGBoost}
 
-El siguiente modelo a evaluar es XGBoost, es un modelo de árboles un poco más complejo,
+El siguiente modelo a evaluar es XGBoost, un modelo de árboles un poco más complejo,
 que en general supera a Random Forest en problemas tabulares.
 
 \begin{table}[ht]
@@ -1127,7 +1143,9 @@ La comparación anterior entrena con un único campo (Norne) y evalúa la transf
 segundo campo (Volve). Para poner a prueba la generalización de forma más exigente,
 realizamos un segundo experimento que incorpora un tercer reservorio, \textbf{SPE9}~\cite{spe9}, y
 adopta un protocolo de \textit{leave-one-out}: para cada campo objetivo, el modelo se
-entrena con los otros dos campos completos y predice el campo que nunca vio.
+entrena con los otros dos campos completos y predice el campo que nunca vio. A esta
+evaluación, en la que el modelo no recibe ningún dato del campo objetivo, se la conoce
+como \textit{zero-shot}.
 
 Los tres campos utilizados son Volve (10 simulaciones), Norne (30) y SPE9 (100). Para que
 la comparación entre familias de modelo sea justa, los tres reciben exactamente la misma
@@ -1182,8 +1200,9 @@ De este experimento se desprenden varias observaciones:
   \item \textbf{Ridge colapsa en los tres campos.} El modelo lineal extrapola de más
   fuera del rango de entrenamiento y llega a un $R^2$ de dos dígitos negativos en Norne.
 
-  \item \textbf{Ningún modelo resuelve SPE9.} SPE9 es el modelo de campo más distinto de los tres (su
-  presión cruza el punto de burbuja y libera gas, una propiedad que no está presente en los datos de entrenamiento) y
+  \item \textbf{Ningún modelo resuelve SPE9.} SPE9 es el modelo de campo más distinto de los tres: su
+  presión cae por debajo del punto de burbuja (la presión a partir de la cual el gas disuelto
+  en el petróleo se libera), un comportamiento que no está presente en los datos de entrenamiento, y
   los tres modelos dan un $R^2$ negativo, tanto global como por simulación.
 \end{itemize}
 
@@ -1193,6 +1212,126 @@ es decir, que el entrenamiento incluya algún campo de régimen parecido al camp
 así, la transferencia es parcial: solo XGBoost queda en positivo en los dos campos de
 régimen parecido (Volve, Norne), y ningún modelo transfiere a un régimen que nunca vio
 (SPE9, que cruza el punto de burbuja).
+
+\subsection{Física embebida: PINN de balance de materiales}
+\label{sec:pinn}
+
+El experimento anterior mostró el límite de los modelos que aprenden todo desde los
+datos: sin información del campo objetivo, ninguno generaliza a un comportamiento que no
+vio durante el entrenamiento. La salida que ya anticipaba la propuesta del proyecto es
+incorporar la física al modelo (PINNs~\cite{ref6}). En esta sección evaluamos esa línea
+con un modelo híbrido de balance de materiales, bajo el mismo protocolo
+\textit{leave-one-out} de la sección anterior.
+
+Partimos de la ecuación de balance de materiales del reservorio, que relaciona la caída
+de presión con el volumen que se extrajo menos el que se repuso por inyección. Escribimos
+esa relación como una ecuación diferencial y la integramos con un paso de Euler
+implementado en PyTorch. Esto nos permite ajustar los parámetros físicos por descenso de
+gradiente, de la misma forma en que se entrenan los pesos de una red. La compresibilidad
+total $c_t(P)$ no es constante: aumenta mucho cuando la presión cae por debajo del punto
+de burbuja y el gas disuelto se libera. Representamos ese cambio con una transición
+suave, definida por tres parámetros físicos acotados a rangos realistas.
+
+Este esquema corresponde al modelo de tanque de la ingeniería de reservorios, que trata
+al yacimiento como un único depósito homogéneo con una sola presión, sin dimensión
+espacial. Por eso hay efectos que no puede representar, como el aporte de un acuífero o
+la heterogeneidad de la roca. Esa parte faltante la aprende una red neuronal pequeña que
+está incluida dentro de la misma ecuación y estima un caudal de aporte adicional. Para
+que esta corrección no termine dominando al modelo físico le pusimos tres restricciones:
+su salida está acotada (no puede crecer sin límite), sus entradas y su salida están
+normalizadas con cantidades de cada simulación (no puede memorizar la escala del campo
+con el que se entrenó) y está penalizada para mantenerse cerca de cero salvo donde los
+datos indiquen lo contrario.
+
+La evaluación replica el protocolo de la sección~\ref{sec:lofo} y suma dos modelos de
+referencia más simples, que sirven para ver cuánto aporta cada parte: el tanque clásico,
+cuya única incógnita es un coeficiente de rigidez $k$ que fija cuánto cae la presión por
+unidad de volumen vaciado (de ahí el nombre ``tanque 1k'' en tablas y figuras), y la
+misma ecuación diferencial sin red (``física pura''). La parte neuronal se entrena con
+tres semillas de inicialización y se reporta media $\pm$ desvío. Además de la predicción
+\textit{zero-shot} probamos un modo \textit{few-shot}, es decir, con unos pocos datos del
+campo nuevo: tomamos una o tres simulaciones elegidas al azar, las usamos para reajustar
+dos o tres parámetros físicos (la red queda congelada) y evaluamos sobre las simulaciones
+restantes. Los mismos subconjuntos de calibración se usan para la física pura y para el
+híbrido, así la comparación entre ambos es justa, y el desvío reportado incluye tanto la
+variación por subconjunto como por semilla.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Campo objetivo} & \textbf{Tanque 1k} & \textbf{Física pura} & \textbf{Híbrido} & \textbf{Few-shot (1 sim)} & \textbf{Few-shot (3 sims)} \\
+\hline
+Volve & -0.13 & diverge & -0.30 $\pm$ 0.05 & +0.36 $\pm$ 0.03 & +0.38 $\pm$ 0.04 \\
+\hline
+Norne & +0.65 & +0.63 & +0.72 $\pm$ 0.10 & +0.82 $\pm$ 0.04 & +0.82 $\pm$ 0.04 \\
+\hline
+SPE9  & -0.00 & -0.36 & +0.39 $\pm$ 0.15 & +0.90 $\pm$ 0.06 & +0.95 $\pm$ 0.02 \\
+\hline
+\end{tabular}
+\caption{PINN de balance de materiales bajo leave-one-out ($R^2$ sobre el campo no
+visto). Las tres primeras columnas son \textit{zero-shot}; las dos últimas son el híbrido
+calibrado con una o tres simulaciones del campo nuevo (evaluación sobre las restantes).
+En Volve la física pura diverge porque el entrenamiento (Norne y SPE9) casi no contiene
+el rango de presiones en el que opera Volve, y el parámetro de compresibilidad de ese
+rango queda sin ajustar.}
+\label{tab:pinn}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{img/pinn_zeroshot_fewshot.png}
+  \caption{Izquierda: $R^2$ \textit{zero-shot} por campo (barras del híbrido con desvío
+  entre semillas; valores recortados a $-1$). Derecha: \textit{few-shot} con una sola
+  simulación de calibración, física pura vs híbrido (media $\pm$ desvío).}
+  \label{fig:pinn_barras}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{img/pinn_trayectoria_spe9.png}
+  \caption{Trayectoria de presión en una simulación de SPE9 no usada para calibrar: real,
+  híbrido \textit{zero-shot} e híbrido \textit{few-shot} (1 sim). La calibración de dos
+  parámetros físicos corrige el sesgo del \textit{zero-shot} y recupera la forma de la
+  caída.}
+  \label{fig:pinn_spe9}
+\end{figure}
+
+De este experimento se desprenden cuatro observaciones:
+
+\begin{itemize}
+  \item El híbrido no diverge en ningún campo. La física pura falla en Volve, mientras
+  que el híbrido se mantiene dentro de valores físicos razonables en los tres campos,
+  gracias a que la corrección aprendida está acotada.
+
+  \item SPE9 \textit{zero-shot} da el primer $R^2$ global positivo del proyecto:
+  los modelos \textit{data-driven} de la sección~\ref{sec:lofo} y los dos modelos físicos
+  de referencia dan $R^2$ negativo sobre SPE9 sin datos del campo, y el híbrido da
+  $+0.39 \pm 0.15$ con las tres semillas en positivo. Si miramos simulación por
+  simulación el resultado es más modesto: la mediana depende de la semilla (va de $+0.39$
+  a $-0.05$), así que hay transferencia real pero todavía no robusta.
+
+  \item El \textit{few-shot} funciona bien y de forma consistente: con una sola
+  simulación de calibración el $R^2$ de SPE9 sube a $0.90 \pm 0.06$, y con tres a
+  $0.95 \pm 0.02$, parecido entre semillas y muy por encima de la física pura calibrada
+  con los mismos datos ($0.59 \pm 0.11$). Con muy pocos datos del campo nuevo alcanza
+  para recuperar el desempeño.
+
+  \item En Volve el $R^2$ no pasa de $\approx 0.35$--$0.40$ con ningún modelo ni con más
+  simulaciones de calibración. El problema acá no son los datos sino el modelo de tanque
+  en sí: Volve es heterogéneo y su presión sube por encima de la inicial, algo que un
+  único depósito sin dimensión espacial no puede reproducir. Para mejorar en Volve haría
+  falta incorporar física espacial.
+\end{itemize}
+
+Como limitación metodológica, los hiperparámetros del modelo se fijaron iterando sobre
+estos mismos tres campos sintéticos, de modo que los resultados \textit{zero-shot} pueden
+estar favorecidos por esa adaptación; la validación definitiva requiere un cuarto campo
+ajeno a todo el ciclo de desarrollo. Aun con ese recaudo, la física embebida fue la única
+familia de modelos que mostró algo de extrapolación \textit{zero-shot}, y observamos que
+cada elemento físico que fuimos agregando durante el desarrollo (el gas que se libera
+debajo del punto de burbuja, la compresibilidad
+dependiente de la presión) mejoró la generalización entre campos.
 
 % ============================================================
 % 15. CRONOGRAMA DE LAS ACTIVIDADES REALIZADAS
@@ -1382,7 +1521,7 @@ escasez de datos reales de presión. Este riesgo se materializó durante el prim
 se mantuvo durante el segundo cuatrimestre.
 
 El equipo esperaba contar con datos provistos por PAE, sin embargo, debido a que el trabajo
-debía ser de caracter publico, no fue posible acceder a dichos datos.
+debía ser de carácter público, no fue posible acceder a dichos datos.
 
 Esta situación implicó un período prolongado de espera e incertidumbre, lo que impactó
 directamente en la planificación inicial y retrasó el avance del proyecto, particularmente en
@@ -1471,11 +1610,46 @@ del agua y la energía.
 
 El trabajo deja varias líneas abiertas, tanto del lado del modelo como de la aplicación.
 
-\subsection{Probar modelos informados por física (PINN de balance de materiales)}
+\subsection{Física embebida (PINN de balance de materiales)}
 
-Algo que nos quedó pendiente fue realizar pruebas con los mencionados modelos informados por física (PINNs).
-Con este tipo de modelos se podría embeber la ecuación de balance de materiales en la función de pérdida
-de la red neuronal, de forma que el modelo pueda aprender las reglas de dicha ecuación.
+El PINN de balance de materiales evaluado en la sección~\ref{sec:pinn} concretó el uso de
+PINNs que se anticipa en el estado del arte, y los resultados marcan qué conviene hacer a
+continuación. El límite que se observa en Volve viene del propio modelo de tanque: al
+tratar al yacimiento como un único depósito sin dimensión espacial, no puede representar
+un campo heterogéneo cuya presión sube por encima de la inicial. Las extensiones
+naturales son agregar un término de aporte de acuífero con la forma del modelo clásico de
+van Everdingen-Hurst como entrada adicional de la corrección neuronal y, a más largo
+plazo, pasar a una formulación con dimensión espacial (la ecuación de difusividad en
+lugar del tanque).
+
+Hay además dos líneas que exploramos de forma preliminar y que valdría la pena
+desarrollar. La primera es permitir que la red también se reajuste durante la calibración
+\textit{few-shot}, de forma controlada (hoy queda congelada y solo se reajustan los
+parámetros físicos): en pruebas exploratorias, esto llevó el $R^2$ de Volve de valores
+cercanos a $0.4$ hasta $0.64$--$0.78$ según la cantidad de simulaciones de calibración.
+La segunda apunta al \textit{zero-shot}: el mecanismo que sostiene la presión de un campo
+(un acuífero, la inyección) no se puede deducir de las entradas actuales del modelo, así
+que mejorar la predicción sin datos del campo requiere entrenar con una población más
+diversa de campos sintéticos y sumar variables que se conocen antes de producir (la
+presencia de un acuífero, los ensayos de pozo). Por último, como ya entrenamos el modelo
+con varias semillas, se puede usar ese conjunto para acompañar cada predicción con una
+banda de incertidumbre.
+
+\subsection{Calibración few-shot}
+
+La experimentación dejó una observación clara: la predicción \textit{zero-shot} a un campo
+nuevo falla por el cambio de dominio, pero alcanza con muy pocos datos del campo nuevo
+para corregirlo. En el caso del PINN (sección~\ref{sec:pinn}), calibrar dos parámetros
+físicos con una sola simulación del campo objetivo lleva el $R^2$ de SPE9 a $0.90$, y con
+tres simulaciones a $0.95$.
+
+En lugar de perseguir una generalización \textit{zero-shot} perfecta, conviene entonces
+diseñar un flujo de calibración: ante un yacimiento nuevo, conseguir un puñado de
+simulaciones (o algo de datos reales) y reajustar el modelo. El paso siguiente es llevar
+ese flujo a un escenario más realista todavía: calibrar con puntos sueltos de presión
+medida (como los que dejan las campañas de medición en pozos) en lugar de historias
+completas. La implicancia práctica es que baja la barrera de datos para usar la
+herramienta en un campo que no estaba representado.
 
 \subsection{Conseguir datos reales}
 
@@ -1509,6 +1683,19 @@ Con respecto al rendimiento del modelo entrenado, logramos realizar estimaciones
 entre reservorios con propiedades similares (Norne y Volve). Sin embargo, el modelo no es capaz
 de extrapolar las predicciones a reservorios con propiedades distintas a las de los reservorios
 utilizados como datos de entrenamiento (en este caso, el modelo de reservorio SPE9).
+
+Ese límite del enfoque puramente \textit{data-driven} motivó la última parte del
+trabajo: incorporar la física al modelo. El PINN de balance de materiales fue el único
+modelo que mostró algo de extrapolación a un campo sin datos, con un $R^2$ global
+positivo sobre SPE9 donde todas las familias \textit{data-driven} dan resultados
+negativos, y observamos que cada elemento físico que fuimos agregando durante su
+desarrollo (el gas que se libera debajo del punto de burbuja, la compresibilidad
+dependiente de la presión, la corrección neuronal acotada) mejoró la generalización
+entre campos. Además, con muy pocos datos del campo nuevo alcanza para recuperar el
+desempeño: reajustando dos parámetros físicos con una a tres simulaciones, el PINN llega
+a un $R^2$ de $0.90$ a $0.95$ en el campo que ningún modelo resolvía sin datos. En la
+práctica, entonces, conviene usar el sistema calibrándolo con la poca información que
+haya del campo objetivo, en lugar de esperar que generalice sin ningún dato.
 
 En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
 la industria, se materializó por completo. La viabilidad del proyecto dependió de la
