@@ -1669,47 +1669,13 @@ corre solo en entorno local.
 El objetivo planteado en la propuesta era construir un sistema basado en machine
 learning para estimar la presión de un reservorio, pensado para ingenieros sin formación
 en ciencia de datos. Ese objetivo se cumplió. El trabajo produjo el pipeline completo,
-desde la generación de datos sintéticos con OPM Flow (40 simulaciones de Volve y Norne,
-más SPE9 para la validación multi-campo), pasando por las \textit{features}
-adimensionales basadas en el balance de materiales y la comparación de cuatro familias de
-modelos, hasta la aplicación web que sirve las predicciones y explica cómo se procesaron
-los datos. Todos los componentes funcionan integrados.
+desde la generación de datos sintéticos con OPM Flow, el entrenamiento del modelo, 
+hasta la aplicación web que sirve las predicciones y explica cómo se procesaron los datos. Todos los componentes funcionan integrados.
 
-La conclusión técnica más importante no estaba en la propuesta original, sino que surgió
-durante la experimentación. Predecir la presión del campo con el que el modelo fue
-entrenado es un problema prácticamente resuelto: las cuatro familias evaluadas superan un
-$R^2$ de 0.9 \textit{in-distribution}. El desafío real es generalizar entre reservorios.
-El mismo modelo que alcanza un $R^2$ de 0.99 sobre Norne puede dar predicciones
-físicamente absurdas sobre Volve. Este \textit{domain shift} es lo que define la
-dificultad de aplicar machine learning en este dominio.
-
-Frente a ese problema, encontramos que los factores que determinan la transferencia entre
-campos son metodológicos antes que algorítmicos. Anclar la predicción a la presión
-inicial del reservorio y normalizar las cantidades por el volumen poral importó más que
-la elección entre Ridge, XGBoost o LSTM. Con el target anclado, hasta los modelos de
-árboles transfieren parcialmente a un campo no visto; sin el anclaje, ninguna familia lo
-logra. A igual representación, ningún modelo transfiere de verdad a los tres campos:
-XGBoost resultó el más estable, y el LSTM conservó la mejor parte de su transferencia en
-Volve. La aplicación web puede servir varios de los modelos desarrollados detrás de una
-interfaz común, y sirve por defecto el LSTM de la línea secuencial con codificación de
-PVT.
-
-El experimento \textit{leave-one-field-out} marcó además el límite del enfoque puramente
-\textit{data-driven}: ningún modelo extrapola a un régimen termodinámico que no vio
-durante el entrenamiento, como pasa con SPE9, cuya presión cruza el punto de burbuja y
-libera gas. La física que no está en los datos de entrenamiento no se puede interpolar.
-Hay dos salidas: incorporarla al modelo o compensarla con datos del campo objetivo, y
-ambas se pusieron a prueba en este trabajo. Sobre la primera, el PINN de balance de
-materiales fue el único modelo con señal de extrapolación \textit{zero-shot}: un $R^2$
-global positivo sobre SPE9 con las tres semillas de entrenamiento, donde todas las
-familias \textit{data-driven} dan resultados negativos. Cada pieza de física correcta que
-se incorporó al modelo (el término de gas libre, la compresibilidad dependiente de la
-presión, la corrección neuronal acotada) mejoró la generalización entre campos. Sobre la
-segunda, la calibración \textit{few-shot} indica que con muy pocas simulaciones del campo
-nuevo alcanza para recuperar el desempeño: ajustando dos parámetros físicos interpretables
-con una a tres simulaciones, el PINN llega a un $R^2$ de $0.90$ a $0.95$ en el campo que
-ningún modelo resolvía sin datos. El modo de uso realista del sistema, entonces, no es la
-generalización perfecta sin datos, sino calibrar con poca información del campo objetivo.
+Con respecto al rendimiento del modelo entrenado, logramos realizar estimaciones decentes
+entre reservorios con propiedades similares (Norne y Volve). Sin embargo, el modelo no es capaz
+de extrapolar las predicciones a reservorios con propiedades distintas a las de los reservorios
+utilizados como datos de entrenamiento (en este caso, el modelo de reservorio SPE9).
 
 En cuanto a la gestión, el riesgo más temido del anteproyecto, la dependencia de datos de
 la industria, se materializó por completo. La viabilidad del proyecto dependió de la
@@ -1719,13 +1685,6 @@ directores permitieron detectar a tiempo los desvíos de alcance y de modelado. 
 que nos llevamos es que en un proyecto de datos aplicado a un dominio industrial, la
 estrategia de datos merece el mismo nivel de planificación que el modelado.
 
-Por último, corresponde delimitar el alcance de estas conclusiones. Todos los resultados
-se obtuvieron sobre datos simulados. La transferencia a datos de campo reales no fue
-demostrada y es la validación pendiente más importante, junto con el contraste contra los
-métodos físicos tradicionales (PTA y EBM), que estaba comprometido en la propuesta y
-quedó fuera de esta etapa. Dentro de esos límites, el trabajo deja un sistema funcional,
-una idea clara de dónde aporta el machine learning y dónde necesita de la física, y una
-dirección de continuación concreta.
 
 % ============================================================
 % 20. APORTES INDIVIDUALES
